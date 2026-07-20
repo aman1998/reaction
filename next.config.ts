@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  serverExternalPackages: ["@svgr/core", "@svgr/plugin-jsx"],
 };
 
 export default nextConfig;
