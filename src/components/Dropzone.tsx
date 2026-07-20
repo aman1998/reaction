@@ -70,14 +70,14 @@ export function Dropzone({ disabled = false, onFileSelect }: DropzoneProps) {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center rounded-xl border border-dashed px-6 py-10 text-center transition-colors",
+        "flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed px-6 py-10 text-center shadow-sm ring-1 ring-foreground/5 transition-colors",
         isDragActive
-          ? "border-primary bg-primary/5"
-          : "border-border bg-muted/20 hover:border-primary/50 hover:bg-muted/40",
+          ? "border-primary bg-primary/10 ring-primary/20"
+          : "border-foreground/20 bg-card hover:border-foreground/35 hover:bg-card/80",
         disabled && "cursor-not-allowed opacity-60",
       )}
     >
-      <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+      <div className="mb-4 flex size-12 items-center justify-center rounded-full bg-secondary text-foreground">
         <Upload className="size-5" />
       </div>
 

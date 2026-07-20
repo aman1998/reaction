@@ -7,9 +7,11 @@ import {
   toComponentName,
   validateFile,
 } from "@/lib/image-utils";
-import { optimizeSvg } from "@/lib/optimize";
+import {
+  optimizeSvgInWorker,
+  vectorizeAndOptimizeInWorker,
+} from "@/lib/process-worker";
 import type { ClientProcessResult, ConvertOptions } from "@/lib/types";
-import { vectorizeRaster } from "@/lib/vectorize";
 
 export async function processImageClient(
   file: File,
@@ -30,16 +32,15 @@ export async function processImageClient(
   const componentName = options.componentName ?? toComponentName(file.name);
   const originalPreview = fileToObjectUrl(file);
 
-  let rawSvg: string;
+  let svg: string;
 
   if (isSvgFile(file) || mime === "image/svg+xml") {
-    rawSvg = await readSvgFile(file);
+    const rawSvg = await readSvgFile(file);
+    svg = await optimizeSvgInWorker(rawSvg);
   } else {
     const imageData = await fileToImageData(file);
-    rawSvg = await vectorizeRaster(imageData);
+    svg = await vectorizeAndOptimizeInWorker(imageData);
   }
-
-  const svg = optimizeSvg(rawSvg);
 
   return {
     svg,

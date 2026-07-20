@@ -2,15 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  ChevronsRight,
-  Download,
-  Heart,
-  Info,
-  Settings,
-  Sparkles,
-} from "lucide-react";
+import { Download, Heart, Info, Settings, Sparkles } from "lucide-react";
 
+import { AppLogo } from "@/components/brand/AppLogo";
 import { cn } from "@/lib/utils";
 
 type NavItem = {
@@ -19,14 +13,12 @@ type NavItem = {
   icon: React.ComponentType<{ className?: string }>;
 };
 
-const topItem: NavItem = {
-  href: "/",
-  label: "скачать",
-  icon: Download,
-};
+const topItems: NavItem[] = [
+  { href: "/", label: "скачать", icon: Download },
+  { href: "/settings", label: "настройки", icon: Settings },
+];
 
 const bottomItems: NavItem[] = [
-  { href: "/settings", label: "настройки", icon: Settings },
   { href: "/donations", label: "донаты", icon: Heart },
   { href: "/news", label: "новости", icon: Sparkles },
   { href: "/info", label: "инфо", icon: Info },
@@ -41,7 +33,7 @@ function NavButton({ item }: { item: NavItem }) {
     <Link
       href={item.href}
       className={cn(
-        "flex w-[72px] flex-col items-center gap-1.5 rounded-xl px-2 py-2.5 text-sm text-muted-foreground transition-colors",
+        "flex w-[80px] flex-col items-center gap-1.5 rounded-xl px-2 py-2.5 text-sm text-muted-foreground transition-colors",
         isActive
           ? "bg-primary text-primary-foreground"
           : "hover:bg-muted hover:text-foreground",
@@ -55,16 +47,15 @@ function NavButton({ item }: { item: NavItem }) {
 
 export function SidebarNav() {
   return (
-    <aside className="flex min-h-full w-[96px] shrink-0 flex-col border-r bg-background">
-      <div className="flex flex-col items-center gap-2 px-3 py-4">
-        <ChevronsRight
-          className="size-5 text-muted-foreground"
-          aria-hidden
-        />
-        <NavButton item={topItem} />
+    <aside className="flex h-dvh w-[112px] shrink-0 flex-col overflow-hidden border-r bg-background">
+      <div className="flex shrink-0 flex-col items-center gap-4 px-3 py-4">
+        <AppLogo className="mb-2" />
+        {topItems.map((item) => (
+          <NavButton key={item.href} item={item} />
+        ))}
       </div>
 
-      <div className="mt-auto flex flex-col items-center gap-2 px-3 py-4">
+      <div className="mt-auto flex shrink-0 flex-col items-center gap-2 px-3 py-4">
         {bottomItems.map((item) => (
           <NavButton key={item.href} item={item} />
         ))}

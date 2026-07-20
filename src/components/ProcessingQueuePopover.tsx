@@ -2,7 +2,7 @@
 
 import { ChevronDown, LoaderCircle } from "lucide-react";
 
-import { useConversion } from "@/components/conversion/ConversionContext";
+import { useConversion } from "@/stores/use-conversion";
 import { Badge } from "@/components/ui/badge";
 import {
   Popover,

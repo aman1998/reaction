@@ -2,7 +2,8 @@
 
 import { LoaderCircle, RotateCcw } from "lucide-react";
 
-import { useConversion } from "@/components/conversion/ConversionContext";
+import { HeroIllustration } from "@/components/brand/HeroIllustration";
+import { useConversion } from "@/stores/use-conversion";
 import { CodeViewer } from "@/components/CodeViewer";
 import { DownloadButtons } from "@/components/DownloadButtons";
 import { Dropzone } from "@/components/Dropzone";
@@ -78,14 +79,18 @@ export function ConversionCenter() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-xl pt-16">
-      <Dropzone disabled={isBusy} onFileSelect={convert} />
+    <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-8 pt-10">
+      <HeroIllustration />
 
-      {error ? (
-        <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-base text-destructive">
-          {error}
-        </div>
-      ) : null}
+      <div className="w-full">
+        <Dropzone disabled={isBusy} onFileSelect={convert} />
+
+        {error ? (
+          <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-base text-destructive">
+            {error}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }
