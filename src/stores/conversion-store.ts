@@ -1,6 +1,5 @@
 import { create } from "zustand";
 
-import { transformAction } from "@/app/actions/transform";
 import {
   clearConversionSession,
   loadConversionSession,
@@ -10,6 +9,7 @@ import {
 } from "@/lib/conversion-persist";
 import { blobUrlToDataUrl, toComponentName, validateFile } from "@/lib/image-utils";
 import { processImageClient } from "@/lib/process-client";
+import { transformSvgInWorker } from "@/lib/process-worker";
 import { useSettingsStore } from "@/stores/settings-store";
 
 export type QueueStage =
@@ -291,7 +291,7 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
           return;
         }
 
-        const transformResult = await transformAction({
+        const transformResult = await transformSvgInWorker({
           svg: item.svg!,
           fileName: item.fileName,
           options: {
@@ -423,7 +423,7 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
             }),
           });
 
-          const transformResult = await transformAction({
+          const transformResult = await transformSvgInWorker({
             svg: clientResult.svg,
             fileName: file.name,
             options: {

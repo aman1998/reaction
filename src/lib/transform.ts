@@ -23,7 +23,8 @@ function buildSvgrConfig(
     ref: style.forwardRef,
     memo: style.memo,
     svgo: false,
-    prettier: true,
+    prettier: false,
+    runtimeConfig: false,
     jsxRuntime: "automatic",
     exportType: style.exportType,
   };

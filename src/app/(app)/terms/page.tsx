@@ -34,10 +34,9 @@ const TERMS_SECTIONS = [
     title: "Processing and Data",
     content: (
       <ul className="list-disc space-y-2 pl-5">
-        <li>Raster vectorization and SVG optimization run locally in your browser.</li>
         <li>
-          To generate JSX/TSX, optimized SVG content is sent to our server for
-          processing.
+          Raster vectorization, SVG optimization, and JSX/TSX generation all run
+          locally in your browser.
         </li>
         <li>
           Conversion results and settings may be stored locally in your browser
