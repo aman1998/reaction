@@ -156,6 +156,14 @@ export function ConversionCenter() {
     <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-8 pt-10">
       <HeroIllustration />
 
+      <div className="max-w-md text-center">
+        <p className="text-lg font-medium">Turn images into React components</p>
+        <p className="mt-2 text-base text-muted-foreground">
+          Upload an icon or image — get optimized SVG and ready-to-use JSX or
+          TSX in one step. No manual vectorization or separate tools.
+        </p>
+      </div>
+
       <div className="w-full">
         <Dropzone disabled={isBusy} onFilesSelect={convertFiles} />
 

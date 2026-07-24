@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Download, Heart, Info, Palette, Settings, Sparkles } from "lucide-react";
+import {
+  Download,
+  Heart,
+  Info,
+  Palette,
+  Settings,
+  Sparkles,
+} from "lucide-react";
 
 import { AppLogo } from "@/components/brand/AppLogo";
 import { cn } from "@/lib/utils";
@@ -19,9 +26,9 @@ const topItems: NavItem[] = [
 ];
 
 const bottomItems: NavItem[] = [
-  { href: "/donations", label: "Donations", icon: Heart },
-  { href: "/news", label: "News", icon: Sparkles },
-  { href: "/info", label: "Info", icon: Info },
+  // { href: "/donations", label: "Donations", icon: Heart },
+  // { href: "/news", label: "News", icon: Sparkles },
+  // { href: "/info", label: "Info", icon: Info },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
@@ -34,22 +41,22 @@ function NavButton({ item }: { item: NavItem }) {
     <Link
       href={item.href}
       className={cn(
-        "flex w-[80px] flex-col items-center gap-1.5 rounded-xl px-2 py-2.5 text-sm text-muted-foreground transition-colors",
+        "flex w-[80px] flex-col items-center gap-[3px] rounded-xl px-2 py-2.5 text-sm text-muted-foreground transition-colors",
         isActive
           ? "bg-primary text-primary-foreground"
           : "hover:bg-muted hover:text-foreground",
       )}
     >
-      <Icon className="size-6" />
-      <span>{item.label}</span>
+      <Icon className="size-5.5" />
+      <span className="text-xs">{item.label}</span>
     </Link>
   );
 }
 
 export function SidebarNav() {
   return (
-    <aside className="flex h-dvh w-[112px] shrink-0 flex-col overflow-hidden border-r bg-background">
-      <div className="flex shrink-0 flex-col items-center gap-4 px-3 py-4">
+    <aside className="flex h-dvh w-[90px] shrink-0 flex-col overflow-hidden border-r bg-background">
+      <div className="flex shrink-0 flex-col items-center gap-[2px] py-4">
         <AppLogo className="mb-2" />
         {topItems.map((item) => (
           <NavButton key={item.href} item={item} />
