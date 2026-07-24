@@ -5,25 +5,112 @@ import {
   type SupportedMime,
 } from "@/lib/types";
 
-export function toComponentName(fileName: string): string {
+export type NamingConvention =
+  | "pascalCase"
+  | "camelCase"
+  | "snakeCase"
+  | "kebabCase"
+  | "screamingSnake";
+
+export const NAMING_CONVENTIONS: NamingConvention[] = [
+  "pascalCase",
+  "camelCase",
+  "snakeCase",
+  "kebabCase",
+  "screamingSnake",
+];
+
+export function isNamingConvention(value: string): value is NamingConvention {
+  return NAMING_CONVENTIONS.includes(value as NamingConvention);
+}
+
+function tokenizeFileName(fileName: string): string[] {
   const baseName = fileName.replace(/\.[^.]+$/, "");
-  const normalized = baseName
+
+  return baseName
     .replace(/[^a-zA-Z0-9]+/g, " ")
     .trim()
     .split(/\s+/)
     .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-    .join("");
+    .map((part) => part.toLowerCase());
+}
 
-  if (!normalized) {
-    return "SvgIcon";
+function formatTokens(
+  tokens: string[],
+  convention: NamingConvention,
+): string {
+  if (tokens.length === 0) {
+    switch (convention) {
+      case "pascalCase":
+        return "SvgIcon";
+      case "camelCase":
+        return "svgIcon";
+      case "snakeCase":
+        return "svg_icon";
+      case "kebabCase":
+        return "svg-icon";
+      case "screamingSnake":
+        return "SVG_ICON";
+    }
   }
 
-  if (/^\d/.test(normalized)) {
-    return `Icon${normalized}`;
+  switch (convention) {
+    case "pascalCase":
+      return tokens
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join("");
+    case "camelCase":
+      return tokens
+        .map((part, index) =>
+          index === 0
+            ? part
+            : part.charAt(0).toUpperCase() + part.slice(1),
+        )
+        .join("");
+    case "snakeCase":
+      return tokens.join("_");
+    case "kebabCase":
+      return tokens.join("-");
+    case "screamingSnake":
+      return tokens.map((part) => part.toUpperCase()).join("_");
+  }
+}
+
+function applyLeadingDigitPrefix(
+  name: string,
+  convention: NamingConvention,
+): string {
+  if (!/^\d/.test(name)) {
+    return name;
   }
 
-  return normalized;
+  switch (convention) {
+    case "pascalCase":
+      return `Icon${name}`;
+    case "camelCase":
+      return `icon${name.charAt(0).toUpperCase()}${name.slice(1)}`;
+    case "snakeCase":
+      return `icon_${name}`;
+    case "kebabCase":
+      return `icon-${name}`;
+    case "screamingSnake":
+      return `ICON_${name}`;
+  }
+}
+
+export function toComponentName(fileName: string): string {
+  const tokens = tokenizeFileName(fileName);
+  const name = formatTokens(tokens, "pascalCase");
+  return applyLeadingDigitPrefix(name, "pascalCase");
+}
+
+export function toFileBaseName(
+  fileName: string,
+  convention: NamingConvention = "pascalCase",
+): string {
+  const tokens = tokenizeFileName(fileName);
+  const name = formatTokens(tokens, convention);
+  return applyLeadingDigitPrefix(name, convention);
 }
 
 export function isSvgFile(file: File): boolean {

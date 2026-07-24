@@ -1,17 +1,15 @@
 "use client";
 
-import { Archive, LoaderCircle } from "lucide-react";
-import { useState } from "react";
+import { LoaderCircle } from "lucide-react";
 
 import { HeroIllustration } from "@/components/brand/HeroIllustration";
 import { ClearQueueDialog } from "@/components/conversion/ClearQueueDialog";
+import { DownloadZipMenu } from "@/components/conversion/DownloadZipMenu";
 import { useConversion } from "@/stores/use-conversion";
 import { CodeViewer } from "@/components/CodeViewer";
 import { DownloadButtons } from "@/components/DownloadButtons";
 import { Dropzone } from "@/components/Dropzone";
 import { Preview } from "@/components/Preview";
-import { Button } from "@/components/ui/button";
-import { downloadComponentsZip } from "@/lib/download-zip";
 import { cn } from "@/lib/utils";
 
 export function ConversionCenter() {
@@ -29,7 +27,6 @@ export function ConversionCenter() {
     selectItem,
     clear,
   } = useConversion();
-  const [isZipping, setIsZipping] = useState(false);
 
   if (view === "processing") {
     const label =
@@ -72,24 +69,7 @@ export function ConversionCenter() {
           </div>
           <div className="flex flex-wrap gap-2">
             {showBatchControls && doneCount > 0 ? (
-              <Button
-                type="button"
-                variant="outline"
-                disabled={isZipping || doneCount === 0}
-                onClick={() => {
-                  setIsZipping(true);
-                  void downloadComponentsZip(queue).finally(() => {
-                    setIsZipping(false);
-                  });
-                }}
-              >
-                {isZipping ? (
-                  <LoaderCircle className="animate-spin" />
-                ) : (
-                  <Archive />
-                )}
-                Download ZIP
-              </Button>
+              <DownloadZipMenu items={queue} disabled={doneCount === 0} />
             ) : null}
             <ClearQueueDialog onConfirm={clear} />
           </div>
@@ -141,10 +121,10 @@ export function ConversionCenter() {
         />
 
         <DownloadButtons
+          fileName={activeItem.fileName}
           svg={activeItem.svg ?? null}
           jsx={activeItem.jsx ?? null}
           tsx={activeItem.tsx ?? null}
-          componentName={activeItem.componentName ?? null}
         />
 
         <Dropzone disabled={isBusy} onFilesSelect={convertFiles} />

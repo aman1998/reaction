@@ -3,12 +3,14 @@
 import { Download } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { toFileBaseName } from "@/lib/image-utils";
+import { useSettingsStore } from "@/stores/settings-store";
 
 type DownloadButtonsProps = {
+  fileName: string;
   svg: string | null;
   jsx: string | null;
   tsx: string | null;
-  componentName: string | null;
 };
 
 function downloadTextFile(
@@ -26,12 +28,13 @@ function downloadTextFile(
 }
 
 export function DownloadButtons({
+  fileName,
   svg,
   jsx,
   tsx,
-  componentName,
 }: DownloadButtonsProps) {
-  const baseName = componentName ?? "Icon";
+  const namingConvention = useSettingsStore((state) => state.namingConvention);
+  const baseName = toFileBaseName(fileName, namingConvention);
 
   if (!svg && !jsx && !tsx) {
     return null;
