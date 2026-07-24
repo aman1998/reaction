@@ -1,20 +1,36 @@
 import { transform } from "@svgr/core";
 import jsxPlugin from "@svgr/plugin-jsx";
 
+import {
+  DEFAULT_COMPONENT_STYLE,
+  getSvgrStyleOptions,
+} from "@/lib/component-style";
 import { toComponentName } from "@/lib/image-utils";
 import type { ConvertOptions } from "@/lib/types";
 
-function buildSvgrConfig(options: ConvertOptions, typescript: boolean) {
+function buildSvgrConfig(
+  options: ConvertOptions,
+  typescript: boolean,
+  componentName: string,
+) {
+  const style = getSvgrStyleOptions(
+    options.componentStyle ?? DEFAULT_COMPONENT_STYLE,
+  );
+
   const config: Parameters<typeof transform>[1] = {
     plugins: [jsxPlugin],
     typescript,
-    ref: options.forwardRef ?? false,
-    memo: options.memo ?? false,
+    ref: style.forwardRef,
+    memo: style.memo,
     svgo: false,
     prettier: true,
     jsxRuntime: "automatic",
-    exportType: "default",
+    exportType: style.exportType,
   };
+
+  if (style.exportType === "named") {
+    config.namedExport = componentName;
+  }
 
   if (options.currentColor) {
     config.replaceAttrValues = {
@@ -39,8 +55,12 @@ export async function transformToReact(
   const state = { componentName };
 
   const [jsx, tsx] = await Promise.all([
-    transform(svg, buildSvgrConfig(options, false), state),
-    transform(svg, buildSvgrConfig(options, true), state),
+    transform(
+      svg,
+      buildSvgrConfig(options, false, componentName),
+      state,
+    ),
+    transform(svg, buildSvgrConfig(options, true, componentName), state),
   ]);
 
   return { jsx, tsx };

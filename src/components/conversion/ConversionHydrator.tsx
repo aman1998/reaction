@@ -22,8 +22,7 @@ export function ConversionHydrator({
     return useSettingsStore.subscribe((state, previousState) => {
       if (
         state.currentColor === previousState.currentColor &&
-        state.forwardRef === previousState.forwardRef &&
-        state.memo === previousState.memo
+        state.componentStyle === previousState.componentStyle
       ) {
         return;
       }

@@ -2,33 +2,47 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import {
+  DEFAULT_COMPONENT_STYLE,
+  isComponentStyle,
+  migrateLegacyOptions,
+  type ComponentStyle,
+} from "@/lib/component-style";
+import {
   isNamingConvention,
   type NamingConvention,
 } from "@/lib/image-utils";
 import type { ConvertOptions } from "@/lib/types";
 
-export type GenerationOptions = Pick<
-  ConvertOptions,
-  "currentColor" | "forwardRef" | "memo"
-> & {
+export type GenerationOptions = Pick<ConvertOptions, "currentColor"> & {
+  componentStyle: ComponentStyle;
   namingConvention: NamingConvention;
 };
+
+type PersistedGenerationOptions = Partial<
+  GenerationOptions & {
+    forwardRef?: boolean;
+    memo?: boolean;
+  }
+>;
 
 export const LEGACY_CONVERT_OPTIONS_KEY = "imagetodev:convert-options";
 
 export const DEFAULT_GENERATION_OPTIONS: Required<GenerationOptions> = {
   currentColor: true,
-  forwardRef: true,
-  memo: false,
+  componentStyle: DEFAULT_COMPONENT_STYLE,
   namingConvention: "pascalCase",
 };
 
 type SettingsState = Required<GenerationOptions> & {
-  updateOption: (key: keyof Pick<GenerationOptions, "currentColor" | "forwardRef" | "memo">, value: boolean) => void;
+  updateOption: (
+    key: keyof Pick<GenerationOptions, "currentColor">,
+    value: boolean,
+  ) => void;
+  updateComponentStyle: (value: ComponentStyle) => void;
   updateNamingConvention: (value: NamingConvention) => void;
 };
 
-function readLegacyOptions(): Partial<GenerationOptions> | null {
+function readLegacyOptions(): PersistedGenerationOptions | null {
   if (typeof window === "undefined") {
     return null;
   }
@@ -40,19 +54,31 @@ function readLegacyOptions(): Partial<GenerationOptions> | null {
       return null;
     }
 
-    return JSON.parse(stored) as Partial<GenerationOptions>;
+    return JSON.parse(stored) as PersistedGenerationOptions;
   } catch {
     return null;
   }
 }
 
 function mergeGenerationOptions(
-  partial: Partial<GenerationOptions> | null | undefined,
+  partial: PersistedGenerationOptions | null | undefined,
 ): Required<GenerationOptions> {
+  if (!partial) {
+    return { ...DEFAULT_GENERATION_OPTIONS };
+  }
+
+  const { forwardRef, memo, ...rest } = partial;
   const merged: Required<GenerationOptions> = {
     ...DEFAULT_GENERATION_OPTIONS,
-    ...partial,
+    ...rest,
   };
+
+  if (!isComponentStyle(merged.componentStyle)) {
+    merged.componentStyle =
+      forwardRef !== undefined || memo !== undefined
+        ? migrateLegacyOptions({ forwardRef, memo })
+        : DEFAULT_GENERATION_OPTIONS.componentStyle;
+  }
 
   if (!isNamingConvention(merged.namingConvention)) {
     merged.namingConvention = DEFAULT_GENERATION_OPTIONS.namingConvention;
@@ -66,20 +92,20 @@ export const useSettingsStore = create<SettingsState>()(
     (set) => ({
       ...DEFAULT_GENERATION_OPTIONS,
       updateOption: (key, value) => set({ [key]: value }),
+      updateComponentStyle: (value) => set({ componentStyle: value }),
       updateNamingConvention: (value) => set({ namingConvention: value }),
     }),
     {
       name: "imagetodev:settings",
       partialize: (state) => ({
         currentColor: state.currentColor,
-        forwardRef: state.forwardRef,
-        memo: state.memo,
+        componentStyle: state.componentStyle,
         namingConvention: state.namingConvention,
       }),
       merge: (persistedState, currentState) => ({
         ...currentState,
         ...mergeGenerationOptions(
-          persistedState as Partial<GenerationOptions> | undefined,
+          persistedState as PersistedGenerationOptions | undefined,
         ),
       }),
       onRehydrateStorage: () => () => {
@@ -109,8 +135,7 @@ export function selectGenerationOptions(
 ): Required<GenerationOptions> {
   return {
     currentColor: state.currentColor,
-    forwardRef: state.forwardRef,
-    memo: state.memo,
+    componentStyle: state.componentStyle,
     namingConvention: state.namingConvention,
   };
 }

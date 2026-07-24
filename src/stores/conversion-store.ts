@@ -94,8 +94,8 @@ function patchQueueItem(
 }
 
 function getGenerationOptions() {
-  const { currentColor, forwardRef, memo } = useSettingsStore.getState();
-  return { currentColor, forwardRef, memo };
+  const { currentColor, componentStyle } = useSettingsStore.getState();
+  return { currentColor, componentStyle };
 }
 
 async function persistDoneItem(

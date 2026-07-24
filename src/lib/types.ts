@@ -1,3 +1,5 @@
+import type { ComponentStyle } from "@/lib/component-style";
+
 export type SupportedMime =
   | "image/png"
   | "image/jpeg"
@@ -17,9 +19,8 @@ export const MAX_IMAGE_DIMENSION = 1024;
 
 export type ConvertOptions = {
   componentName?: string;
+  componentStyle?: ComponentStyle;
   currentColor?: boolean;
-  forwardRef?: boolean;
-  memo?: boolean;
 };
 
 export type ClientProcessResult = {
