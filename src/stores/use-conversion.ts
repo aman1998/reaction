@@ -3,7 +3,10 @@
 import { useShallow } from "zustand/react/shallow";
 
 import {
+  selectActiveItem,
+  selectDoneCount,
   selectIsBusy,
+  selectProcessingItem,
   useConversionStore,
   type ConversionView,
   type QueueItem,
@@ -22,13 +25,14 @@ export function useConversion() {
     useShallow((state) => ({
       view: state.view,
       queue: state.queue,
-      originalPreview: state.originalPreview,
-      svg: state.svg,
-      jsx: state.jsx,
-      tsx: state.tsx,
-      componentName: state.componentName,
+      activeId: state.activeId,
+      activeItem: selectActiveItem(state),
+      processingItem: selectProcessingItem(state),
+      doneCount: selectDoneCount(state),
+      totalCount: state.queue.length,
       error: state.error,
-      convert: state.convert,
+      convertFiles: state.convertFiles,
+      selectItem: state.selectItem,
       reset: state.reset,
       isBusy: selectIsBusy(state),
     })),

@@ -7,13 +7,13 @@ import { cn } from "@/lib/utils";
 
 type DropzoneProps = {
   disabled?: boolean;
-  onFileSelect: (file: File) => void;
+  onFilesSelect: (files: File[]) => void;
 };
 
 const ACCEPT =
   "image/png,image/jpeg,image/webp,image/svg+xml,.png,.jpg,.jpeg,.webp,.svg";
 
-export function Dropzone({ disabled = false, onFileSelect }: DropzoneProps) {
+export function Dropzone({ disabled = false, onFilesSelect }: DropzoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState(false);
 
@@ -38,18 +38,18 @@ export function Dropzone({ disabled = false, onFileSelect }: DropzoneProps) {
       return;
     }
 
-    const droppedFile = event.dataTransfer.files.item(0);
+    const droppedFiles = Array.from(event.dataTransfer.files);
 
-    if (droppedFile) {
-      onFileSelect(droppedFile);
+    if (droppedFiles.length > 0) {
+      onFilesSelect(droppedFiles);
     }
   };
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = event.target.files?.item(0);
+    const selectedFiles = Array.from(event.target.files ?? []);
 
-    if (selectedFile) {
-      onFileSelect(selectedFile);
+    if (selectedFiles.length > 0) {
+      onFilesSelect(selectedFiles);
     }
 
     event.target.value = "";
@@ -82,16 +82,17 @@ export function Dropzone({ disabled = false, onFileSelect }: DropzoneProps) {
       </div>
 
       <p className="text-base font-medium">
-        перетащи изображение сюда или выбери файл
+        перетащи изображения сюда или выбери файлы
       </p>
       <p className="mt-2 max-w-sm text-base text-muted-foreground">
-        PNG, JPG, JPEG, WebP или SVG до 5 MB
+        PNG, JPG, JPEG, WebP или SVG до 5 MB — можно несколько сразу
       </p>
 
       <input
         ref={inputRef}
         type="file"
         accept={ACCEPT}
+        multiple
         className="hidden"
         disabled={disabled}
         onChange={handleInputChange}

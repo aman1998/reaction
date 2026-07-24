@@ -12,6 +12,7 @@ import {
   PopoverTitle,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 function stageLabel(stage: string | undefined): string {
   switch (stage) {
@@ -23,29 +24,41 @@ function stageLabel(stage: string | undefined): string {
       return "готово";
     case "error":
       return "ошибка";
+    case "idle":
+      return "ожидание";
     default:
       return "ожидание";
   }
 }
 
 export function ProcessingQueuePopover() {
-  const { queue, isBusy } = useConversion();
+  const { queue, isBusy, activeId, selectItem, doneCount, totalCount } =
+    useConversion();
 
   return (
     <Popover>
       <PopoverTrigger
-        className="inline-flex size-9 items-center justify-center rounded-full border border-border bg-background text-foreground transition-colors hover:bg-muted"
+        className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-border bg-background px-2.5 text-foreground transition-colors hover:bg-muted"
         aria-label="Очередь обработки"
       >
         <ChevronDown className="size-4" />
+        {totalCount > 0 ? (
+          <span className="text-xs tabular-nums text-muted-foreground">
+            {doneCount}/{totalCount}
+          </span>
+        ) : null}
       </PopoverTrigger>
       <PopoverContent align="end" className="w-[min(92vw,360px)] p-4">
         <PopoverHeader className="flex-row items-center justify-between gap-2">
           <PopoverTitle>очередь обработки</PopoverTitle>
-          <Badge variant="secondary">MVP</Badge>
+          {totalCount > 0 ? (
+            <Badge variant="secondary">
+              {doneCount}/{totalCount}
+            </Badge>
+          ) : null}
         </PopoverHeader>
 
-        {!queue || queue.stage === "idle" ? (
+        {queue.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-6 text-center">
             <div className="text-muted-foreground">
               <svg
@@ -70,31 +83,57 @@ export function ProcessingQueuePopover() {
             </PopoverDescription>
           </div>
         ) : (
-          <div className="rounded-lg border bg-muted/20 p-3">
-            <div className="flex items-start gap-3">
-              <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-background">
-                {queue.previewUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={queue.previewUrl}
-                    alt={queue.fileName}
-                    className="size-full object-cover"
-                  />
-                ) : isBusy ? (
-                  <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
-                ) : null}
-              </div>
+          <div className="flex max-h-[320px] flex-col gap-2 overflow-y-auto">
+            {queue.map((item) => {
+              const isActive = item.id === activeId;
+              const isSelectable = item.stage === "done";
+              const isItemBusy =
+                item.stage === "vectorizing" || item.stage === "generating";
 
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-base font-medium">{queue.fileName}</p>
-                <p className="text-base text-muted-foreground">
-                  {stageLabel(queue.stage)}
-                </p>
-                {queue.error ? (
-                  <p className="mt-2 text-base text-destructive">{queue.error}</p>
-                ) : null}
-              </div>
-            </div>
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  disabled={!isSelectable}
+                  onClick={() => selectItem(item.id)}
+                  className={cn(
+                    "rounded-lg border bg-muted/20 p-3 text-left transition-colors",
+                    isActive && "border-primary bg-primary/5",
+                    isSelectable && "hover:bg-muted/40",
+                    !isSelectable && "cursor-default",
+                  )}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-background">
+                      {item.previewUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={item.previewUrl}
+                          alt={item.fileName}
+                          className="size-full object-cover"
+                        />
+                      ) : isItemBusy || (isBusy && item.stage === "idle") ? (
+                        <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
+                      ) : null}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-base font-medium">
+                        {item.fileName}
+                      </p>
+                      <p className="text-base text-muted-foreground">
+                        {stageLabel(item.stage)}
+                      </p>
+                      {item.error ? (
+                        <p className="mt-2 text-base text-destructive">
+                          {item.error}
+                        </p>
+                      ) : null}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         )}
       </PopoverContent>

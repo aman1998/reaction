@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Download, Heart, Info, Settings, Sparkles } from "lucide-react";
+import { Download, Heart, Info, Palette, Settings, Sparkles } from "lucide-react";
 
 import { AppLogo } from "@/components/brand/AppLogo";
 import { cn } from "@/lib/utils";
@@ -15,13 +15,14 @@ type NavItem = {
 
 const topItems: NavItem[] = [
   { href: "/", label: "скачать", icon: Download },
-  { href: "/settings", label: "настройки", icon: Settings },
+  { href: "/style", label: "стиль", icon: Palette },
 ];
 
 const bottomItems: NavItem[] = [
   { href: "/donations", label: "донаты", icon: Heart },
   { href: "/news", label: "новости", icon: Sparkles },
   { href: "/info", label: "инфо", icon: Info },
+  { href: "/settings", label: "настройки", icon: Settings },
 ];
 
 function NavButton({ item }: { item: NavItem }) {
