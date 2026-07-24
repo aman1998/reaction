@@ -128,3 +128,27 @@
     @apply font-sans text-base;
   }
 }
+
+@layer utilities {
+  .queue-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .queue-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .queue-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .queue-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 9999px;
+  }
+
+  .queue-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: var(--muted-foreground);
+  }
+}

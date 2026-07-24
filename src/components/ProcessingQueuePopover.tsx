@@ -1,7 +1,9 @@
 "use client";
 
 import { ChevronDown, LoaderCircle } from "lucide-react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
+import { RemoveQueueItemDialog } from "@/components/conversion/RemoveQueueItemDialog";
 import { useConversion } from "@/stores/use-conversion";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -32,11 +34,53 @@ function stageLabel(stage: string | undefined): string {
 }
 
 export function ProcessingQueuePopover() {
-  const { queue, isBusy, activeId, selectItem, doneCount, totalCount } =
-    useConversion();
+  const {
+    queue,
+    isBusy,
+    activeId,
+    selectItem,
+    removeItem,
+    doneCount,
+    totalCount,
+  } = useConversion();
+  const [open, setOpen] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollItemIntoView = useCallback((id: string) => {
+    if (!scrollContainerRef.current) {
+      return;
+    }
+
+    const element = scrollContainerRef.current.querySelector(
+      `[data-queue-item-id="${id}"]`,
+    );
+
+    if (element instanceof HTMLElement) {
+      element.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }, []);
+
+  const scrollActiveIntoView = useCallback(() => {
+    if (!activeId) {
+      return;
+    }
+
+    scrollItemIntoView(activeId);
+  }, [activeId, scrollItemIntoView]);
+
+  useLayoutEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    scrollActiveIntoView();
+
+    const timeoutId = window.setTimeout(scrollActiveIntoView, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [open, activeId, scrollActiveIntoView]);
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger
         className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-border bg-background px-2.5 text-foreground transition-colors hover:bg-muted"
         aria-label="Processing queue"
@@ -48,8 +92,11 @@ export function ProcessingQueuePopover() {
           </span>
         ) : null}
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[min(92vw,360px)] p-4">
-        <PopoverHeader className="flex-row items-center justify-between gap-2">
+      <PopoverContent
+        align="end"
+        className="w-[min(92vw,360px)] overflow-hidden p-0"
+      >
+        <PopoverHeader className="flex-row items-center justify-between gap-2 px-4 pt-4 pb-2">
           <PopoverTitle>Processing queue</PopoverTitle>
           {totalCount > 0 ? (
             <Badge variant="secondary">
@@ -59,7 +106,7 @@ export function ProcessingQueuePopover() {
         </PopoverHeader>
 
         {queue.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 py-6 text-center">
+          <div className="flex flex-col items-center gap-3 px-4 pb-4 py-6 text-center">
             <div className="text-muted-foreground">
               <svg
                 viewBox="0 0 80 80"
@@ -82,58 +129,80 @@ export function ProcessingQueuePopover() {
             </PopoverDescription>
           </div>
         ) : (
-          <div className="flex max-h-[320px] flex-col gap-2 overflow-y-auto">
-            {queue.map((item) => {
+          <div
+            ref={scrollContainerRef}
+            className="queue-scrollbar max-h-[320px] overflow-y-auto pl-4 pr-0 pb-4"
+          >
+            <div className="flex flex-col gap-2 pr-4">
+              {queue.map((item) => {
               const isActive = item.id === activeId;
               const isSelectable = item.stage === "done";
               const isItemBusy =
                 item.stage === "vectorizing" || item.stage === "generating";
+              const canRemove = !isItemBusy;
               const previewSrc = item.previewUrl ?? item.previewDataUrl;
 
               return (
-                <button
+                <div
                   key={item.id}
-                  type="button"
-                  disabled={!isSelectable}
-                  onClick={() => selectItem(item.id)}
+                  data-queue-item-id={item.id}
                   className={cn(
-                    "rounded-lg border bg-muted/20 p-3 text-left transition-colors",
-                    isActive && "border-primary bg-primary/5",
-                    isSelectable && "hover:bg-muted/40",
-                    !isSelectable && "cursor-default",
+                    "flex w-full items-start gap-2 rounded-lg border bg-muted/20 p-3",
+                    isActive && "border-primary bg-primary/5 scroll-mt-2",
                   )}
                 >
-                  <div className="flex items-start gap-3">
-                    <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-background">
-                      {previewSrc ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={previewSrc}
-                          alt={item.fileName}
-                          className="size-full object-cover"
-                        />
-                      ) : isItemBusy || (isBusy && item.stage === "idle") ? (
-                        <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
-                      ) : null}
-                    </div>
+                  <button
+                    type="button"
+                    disabled={!isSelectable}
+                    onClick={() => {
+                      selectItem(item.id);
+                      scrollItemIntoView(item.id);
+                    }}
+                    className={cn(
+                      "min-w-0 flex-1 text-left transition-colors",
+                      isSelectable && "hover:opacity-80",
+                      !isSelectable && "cursor-default",
+                    )}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-background">
+                        {previewSrc ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={previewSrc}
+                            alt={item.fileName}
+                            className="size-full object-cover"
+                          />
+                        ) : isItemBusy || (isBusy && item.stage === "idle") ? (
+                          <LoaderCircle className="size-5 animate-spin text-muted-foreground" />
+                        ) : null}
+                      </div>
 
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-base font-medium">
-                        {item.fileName}
-                      </p>
-                      <p className="text-base text-muted-foreground">
-                        {stageLabel(item.stage)}
-                      </p>
-                      {item.error ? (
-                        <p className="mt-2 text-base text-destructive">
-                          {item.error}
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-base font-medium">
+                          {item.fileName}
                         </p>
-                      ) : null}
+                        <p className="text-base text-muted-foreground">
+                          {stageLabel(item.stage)}
+                        </p>
+                        {item.error ? (
+                          <p className="mt-2 text-base text-destructive">
+                            {item.error}
+                          </p>
+                        ) : null}
+                      </div>
                     </div>
-                  </div>
-                </button>
+                  </button>
+
+                  <RemoveQueueItemDialog
+                    fileName={item.fileName}
+                    disabled={!canRemove}
+                    onConfirm={() => removeItem(item.id)}
+                  />
+                </div>
               );
-            })}
+              })}
+            </div>
           </div>
         )}
       </PopoverContent>

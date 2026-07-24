@@ -1,9 +1,10 @@
 "use client";
 
-import { Archive, LoaderCircle, Trash2 } from "lucide-react";
+import { Archive, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 
 import { HeroIllustration } from "@/components/brand/HeroIllustration";
+import { ClearQueueDialog } from "@/components/conversion/ClearQueueDialog";
 import { useConversion } from "@/stores/use-conversion";
 import { CodeViewer } from "@/components/CodeViewer";
 import { DownloadButtons } from "@/components/DownloadButtons";
@@ -90,10 +91,7 @@ export function ConversionCenter() {
                 Download ZIP
               </Button>
             ) : null}
-            <Button type="button" variant="outline" onClick={clear}>
-              <Trash2 />
-              Clear
-            </Button>
+            <ClearQueueDialog onConfirm={clear} />
           </div>
         </div>
 

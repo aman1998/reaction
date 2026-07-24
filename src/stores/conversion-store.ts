@@ -4,6 +4,7 @@ import { transformAction } from "@/app/actions/transform";
 import {
   clearConversionSession,
   loadConversionSession,
+  removePersistedItems,
   saveConversionItem,
   saveSessionMeta,
 } from "@/lib/conversion-persist";
@@ -47,6 +48,7 @@ type ConversionState = {
   hasHydrated: boolean;
   convertFiles: (files: File[]) => void;
   selectItem: (id: string) => void;
+  removeItem: (id: string) => void;
   clear: () => void;
   hydrate: () => Promise<void>;
   retransformDoneItems: () => Promise<void>;
@@ -184,6 +186,89 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
 
     set({ activeId: id, view: "result" });
     void saveSessionMeta({ activeId: id, view: "result" });
+  },
+
+  removeItem: (id) => {
+    const item = get().queue.find((entry) => entry.id === id);
+
+    if (!item) {
+      return;
+    }
+
+    if (item.stage === "vectorizing" || item.stage === "generating") {
+      return;
+    }
+
+    revokePreviewUrl(item.previewUrl);
+    filesById.delete(id);
+
+    const nextQueue = get().queue.filter((entry) => entry.id !== id);
+
+    if (nextQueue.length === 0) {
+      processGeneration += 1;
+      retransformGeneration += 1;
+      filesById = new Map();
+
+      void clearConversionSession();
+
+      set({
+        view: "upload",
+        queue: [],
+        activeId: null,
+        error: null,
+        isConverting: false,
+        isRetransforming: false,
+      });
+      return;
+    }
+
+    const wasActive = get().activeId === id;
+    const hasDone = nextQueue.some((entry) => entry.stage === "done");
+    const isBatchRunning = nextQueue.some(
+      (entry) =>
+        entry.stage === "idle" ||
+        entry.stage === "vectorizing" ||
+        entry.stage === "generating",
+    );
+
+    let nextActiveId = get().activeId;
+    let nextView = get().view;
+
+    if (wasActive) {
+      nextActiveId =
+        nextQueue.find((entry) => entry.stage === "done")?.id ?? null;
+      nextView = hasDone
+        ? "result"
+        : isBatchRunning
+          ? "processing"
+          : "upload";
+    } else if (
+      nextActiveId &&
+      !nextQueue.some((entry) => entry.id === nextActiveId)
+    ) {
+      nextActiveId =
+        nextQueue.find((entry) => entry.stage === "done")?.id ?? null;
+      nextView = hasDone
+        ? "result"
+        : isBatchRunning
+          ? "processing"
+          : "upload";
+    }
+
+    if (!hasDone && !isBatchRunning) {
+      nextView = "upload";
+      nextActiveId = null;
+    }
+
+    set({
+      queue: nextQueue,
+      activeId: nextActiveId,
+      view: nextView,
+      isConverting: isBatchRunning ? get().isConverting : false,
+    });
+
+    void removePersistedItems([id]);
+    void saveSessionMeta({ activeId: nextActiveId, view: nextView });
   },
 
   retransformDoneItems: async () => {
