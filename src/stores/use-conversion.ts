@@ -33,7 +33,10 @@ export function useConversion() {
       error: state.error,
       convertFiles: state.convertFiles,
       selectItem: state.selectItem,
-      reset: state.reset,
+      clear: state.clear,
+      hydrate: state.hydrate,
+      hasHydrated: state.hasHydrated,
+      isRetransforming: state.isRetransforming,
       isBusy: selectIsBusy(state),
     })),
   );

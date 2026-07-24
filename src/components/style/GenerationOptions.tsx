@@ -15,17 +15,17 @@ const OPTION_ITEMS: {
   {
     key: "currentColor",
     label: "currentColor",
-    description: "Заменять чёрный fill/stroke на currentColor",
+    description: "Replace black fill/stroke with currentColor",
   },
   {
     key: "forwardRef",
     label: "forwardRef",
-    description: "Оборачивать компонент в React.forwardRef",
+    description: "Wrap the component with React.forwardRef",
   },
   {
     key: "memo",
     label: "React.memo",
-    description: "Оборачивать компонент в React.memo",
+    description: "Wrap the component with React.memo",
   },
 ];
 

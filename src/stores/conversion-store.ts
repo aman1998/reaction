@@ -1,7 +1,13 @@
 import { create } from "zustand";
 
 import { transformAction } from "@/app/actions/transform";
-import { toComponentName, validateFile } from "@/lib/image-utils";
+import {
+  clearConversionSession,
+  loadConversionSession,
+  saveConversionItem,
+  saveSessionMeta,
+} from "@/lib/conversion-persist";
+import { blobUrlToDataUrl, toComponentName, validateFile } from "@/lib/image-utils";
 import { processImageClient } from "@/lib/process-client";
 import { useSettingsStore } from "@/stores/settings-store";
 
@@ -18,6 +24,7 @@ export type QueueItem = {
   stage: QueueStage;
   error?: string;
   previewUrl?: string;
+  previewDataUrl?: string;
   svg?: string;
   jsx?: string;
   tsx?: string;
@@ -36,9 +43,13 @@ type ConversionState = {
   activeId: string | null;
   error: string | null;
   isConverting: boolean;
+  isRetransforming: boolean;
+  hasHydrated: boolean;
   convertFiles: (files: File[]) => void;
   selectItem: (id: string) => void;
-  reset: () => void;
+  clear: () => void;
+  hydrate: () => Promise<void>;
+  retransformDoneItems: () => Promise<void>;
 };
 
 function createId(): string {
@@ -46,7 +57,7 @@ function createId(): string {
 }
 
 function revokePreviewUrl(url: string | undefined): void {
-  if (url) {
+  if (url?.startsWith("blob:")) {
     URL.revokeObjectURL(url);
   }
 }
@@ -64,6 +75,7 @@ function toPublicItem(item: InternalQueueItem): QueueItem {
     stage: item.stage,
     error: item.error,
     previewUrl: item.previewUrl,
+    previewDataUrl: item.previewDataUrl,
     svg: item.svg,
     jsx: item.jsx,
     tsx: item.tsx,
@@ -79,8 +91,34 @@ function patchQueueItem(
   return queue.map((item) => (item.id === id ? { ...item, ...patch } : item));
 }
 
+function getGenerationOptions() {
+  const { currentColor, forwardRef, memo } = useSettingsStore.getState();
+  return { currentColor, forwardRef, memo };
+}
+
+async function persistDoneItem(
+  item: QueueItem,
+  activeId: string | null,
+  view: ConversionView,
+): Promise<void> {
+  let previewDataUrl = item.previewDataUrl;
+
+  if (item.previewUrl && !previewDataUrl) {
+    previewDataUrl = await blobUrlToDataUrl(item.previewUrl);
+  }
+
+  const persistedItem: QueueItem = {
+    ...item,
+    previewDataUrl,
+  };
+
+  await saveConversionItem(persistedItem);
+  await saveSessionMeta({ activeId, view });
+}
+
 let filesById = new Map<string, File>();
 let processGeneration = 0;
+let retransformGeneration = 0;
 
 export const useConversionStore = create<ConversionState>((set, get) => ({
   view: "upload",
@@ -88,11 +126,44 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
   activeId: null,
   error: null,
   isConverting: false,
+  isRetransforming: false,
+  hasHydrated: false,
 
-  reset: () => {
+  hydrate: async () => {
+    if (get().hasHydrated) {
+      return;
+    }
+
+    try {
+      const session = await loadConversionSession();
+
+      if (session.items.length === 0) {
+        set({ hasHydrated: true });
+        return;
+      }
+
+      set({
+        queue: session.items,
+        activeId:
+          session.activeId &&
+          session.items.some((item) => item.id === session.activeId)
+            ? session.activeId
+            : (session.items.at(-1)?.id ?? null),
+        view: "result",
+        hasHydrated: true,
+      });
+    } catch {
+      set({ hasHydrated: true });
+    }
+  },
+
+  clear: () => {
     processGeneration += 1;
+    retransformGeneration += 1;
     revokeQueuePreviews(get().queue);
     filesById = new Map();
+
+    void clearConversionSession();
 
     set({
       view: "upload",
@@ -100,6 +171,7 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
       activeId: null,
       error: null,
       isConverting: false,
+      isRetransforming: false,
     });
   },
 
@@ -111,11 +183,80 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
     }
 
     set({ activeId: id, view: "result" });
+    void saveSessionMeta({ activeId: id, view: "result" });
+  },
+
+  retransformDoneItems: async () => {
+    const doneItems = get().queue.filter(
+      (item) => item.stage === "done" && item.svg,
+    );
+
+    if (doneItems.length === 0) {
+      return;
+    }
+
+    const generation = ++retransformGeneration;
+    set({ isRetransforming: true });
+
+    try {
+      const options = getGenerationOptions();
+
+      for (const item of doneItems) {
+        if (generation !== retransformGeneration) {
+          return;
+        }
+
+        const transformResult = await transformAction({
+          svg: item.svg!,
+          fileName: item.fileName,
+          options: {
+            componentName: item.componentName,
+            ...options,
+          },
+        });
+
+        if (generation !== retransformGeneration) {
+          return;
+        }
+
+        if ("error" in transformResult) {
+          continue;
+        }
+
+        const nextQueue = patchQueueItem(get().queue, item.id, {
+          jsx: transformResult.jsx,
+          tsx: transformResult.tsx,
+          componentName: transformResult.componentName,
+        });
+
+        set({ queue: nextQueue });
+
+        const updatedItem = nextQueue.find((entry) => entry.id === item.id);
+
+        if (updatedItem) {
+          await saveConversionItem(updatedItem);
+        }
+      }
+    } finally {
+      if (generation === retransformGeneration) {
+        set({ isRetransforming: false });
+      }
+    }
   },
 
   convertFiles: (files) => {
     const generation = ++processGeneration;
-    revokeQueuePreviews(get().queue);
+
+    const existingDone = get().queue.filter((item) => item.stage === "done");
+    const inProgress = get().queue.filter(
+      (item) =>
+        item.stage === "idle" ||
+        item.stage === "vectorizing" ||
+        item.stage === "generating" ||
+        item.stage === "error",
+    );
+
+    revokeQueuePreviews(inProgress);
     filesById = new Map();
 
     const validItems: InternalQueueItem[] = [];
@@ -142,23 +283,21 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
 
     if (validItems.length === 0) {
       set({
-        view: "upload",
-        queue: [],
-        activeId: null,
         error:
           validationErrors[0] ??
           "No valid files. Use PNG, JPG, JPEG, WebP, or SVG up to 5 MB.",
-        isConverting: false,
       });
       return;
     }
+
+    const nextActiveId = get().activeId;
+    const startingQueue = [...existingDone, ...validItems.map(toPublicItem)];
 
     set({
       error: validationErrors.length > 0 ? validationErrors.join(" ") : null,
       view: "processing",
       isConverting: true,
-      activeId: null,
-      queue: validItems.map(toPublicItem),
+      queue: startingQueue,
     });
 
     void (async () => {
@@ -190,9 +329,6 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
             return;
           }
 
-          const { currentColor, forwardRef, memo } =
-            useSettingsStore.getState();
-
           set({
             queue: patchQueueItem(get().queue, item.id, {
               stage: "generating",
@@ -207,9 +343,7 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
             fileName: file.name,
             options: {
               componentName: clientResult.componentName,
-              currentColor,
-              forwardRef,
-              memo,
+              ...getGenerationOptions(),
             },
           });
 
@@ -221,16 +355,30 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
             throw new Error(transformResult.error);
           }
 
+          let previewDataUrl: string | undefined;
+
+          try {
+            previewDataUrl = await blobUrlToDataUrl(
+              clientResult.originalPreview,
+            );
+          } catch {
+            previewDataUrl = undefined;
+          }
+
           const nextQueue = patchQueueItem(get().queue, item.id, {
             stage: "done",
             previewUrl: clientResult.originalPreview,
+            previewDataUrl,
             svg: clientResult.svg,
             jsx: transformResult.jsx,
             tsx: transformResult.tsx,
             componentName: transformResult.componentName,
           });
 
-          const shouldActivate = get().activeId === null;
+          const shouldActivate = get().activeId === null && nextActiveId === null;
+          const activeId = shouldActivate
+            ? item.id
+            : (get().activeId ?? nextActiveId);
 
           set({
             queue: nextQueue,
@@ -238,6 +386,16 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
               ? { activeId: item.id, view: "result" as const }
               : {}),
           });
+
+          const doneItem = nextQueue.find((entry) => entry.id === item.id);
+
+          if (doneItem) {
+            await persistDoneItem(
+              doneItem,
+              shouldActivate ? item.id : activeId,
+              "result",
+            );
+          }
         } catch (conversionError) {
           if (generation !== processGeneration) {
             return;
@@ -268,13 +426,22 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
         isConverting: false,
         view: hasDone ? "result" : "upload",
         activeId: hasDone
-          ? (activeId ?? queue.find((entry) => entry.stage === "done")?.id ?? null)
+          ? (activeId ??
+            queue.find((entry) => entry.stage === "done")?.id ??
+            null)
           : null,
         error: hasDone
           ? get().error
           : (queue.find((entry) => entry.stage === "error")?.error ??
             "Conversion failed."),
       });
+
+      if (hasDone) {
+        await saveSessionMeta({
+          activeId: get().activeId,
+          view: "result",
+        });
+      }
     })();
   },
 }));

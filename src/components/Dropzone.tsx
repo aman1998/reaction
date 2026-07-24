@@ -82,10 +82,10 @@ export function Dropzone({ disabled = false, onFilesSelect }: DropzoneProps) {
       </div>
 
       <p className="text-base font-medium">
-        перетащи изображения сюда или выбери файлы
+        Drop images here or choose files
       </p>
       <p className="mt-2 max-w-sm text-base text-muted-foreground">
-        PNG, JPG, JPEG, WebP или SVG до 5 MB — можно несколько сразу
+        PNG, JPG, JPEG, WebP, or SVG up to 5 MB — multiple files supported
       </p>
 
       <input

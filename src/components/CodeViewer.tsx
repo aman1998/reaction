@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ type CodeViewerProps = {
   svg: string | null;
   jsx: string | null;
   tsx: string | null;
+  isRetransforming?: boolean;
 };
 
 type CodeTab = "svg" | "jsx" | "tsx";
@@ -18,7 +19,12 @@ async function copyToClipboard(value: string): Promise<void> {
   await navigator.clipboard.writeText(value);
 }
 
-export function CodeViewer({ svg, jsx, tsx }: CodeViewerProps) {
+export function CodeViewer({
+  svg,
+  jsx,
+  tsx,
+  isRetransforming = false,
+}: CodeViewerProps) {
   const [copiedTab, setCopiedTab] = useState<CodeTab | null>(null);
 
   const tabs: Array<{ id: CodeTab; label: string; value: string | null }> = [
@@ -42,7 +48,13 @@ export function CodeViewer({ svg, jsx, tsx }: CodeViewerProps) {
   }
 
   return (
-    <div className="rounded-xl border bg-card">
+    <div className="relative rounded-xl border bg-card">
+      {isRetransforming ? (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/70 backdrop-blur-[1px]">
+          <LoaderCircle className="size-6 animate-spin text-muted-foreground" />
+        </div>
+      ) : null}
+
       <Tabs defaultValue="tsx">
         <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
           <TabsList>
@@ -64,14 +76,14 @@ export function CodeViewer({ svg, jsx, tsx }: CodeViewerProps) {
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={!tab.value}
+                disabled={!tab.value || isRetransforming}
                 onClick={() => handleCopy(tab.id, tab.value)}
               >
                 {copiedTab === tab.id ? <Check /> : <Copy />}
                 {copiedTab === tab.id ? "Copied" : "Copy"}
               </Button>
             </div>
-            <pre className="max-h-[420px] overflow-auto p-4 text-sm leading-6">
+            <pre className="max-h-[420px] overflow-auto p-4 font-mono text-sm leading-6">
               <code>{tab.value ?? "Generate a component to view code."}</code>
             </pre>
           </TabsContent>

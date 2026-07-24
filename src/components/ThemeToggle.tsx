@@ -25,7 +25,7 @@ export function ThemeToggle({
         variant="outline"
         size="icon"
         className={cn("rounded-full", className)}
-        aria-label={isDark ? "Светлая тема" : "Тёмная тема"}
+        aria-label={isDark ? "Light theme" : "Dark theme"}
         onClick={() => setTheme(isDark ? "light" : "dark")}
       >
         {isDark ? <Sun /> : <Moon />}
@@ -41,7 +41,7 @@ export function ThemeToggle({
       onClick={() => setTheme(isDark ? "light" : "dark")}
     >
       {isDark ? <Sun /> : <Moon />}
-      {isDark ? "Светлая тема" : "Тёмная тема"}
+      {isDark ? "Light theme" : "Dark theme"}
     </Button>
   );
 }

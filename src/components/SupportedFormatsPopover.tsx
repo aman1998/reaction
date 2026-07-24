@@ -19,14 +19,14 @@ export function SupportedFormatsPopover() {
     <Popover>
       <PopoverTrigger className="inline-flex items-center gap-1.5 text-base text-muted-foreground transition-colors hover:text-foreground">
         <Plus className="size-4" />
-        поддерживаемые форматы
+        Supported formats
       </PopoverTrigger>
       <PopoverContent align="center" className="w-[min(92vw,420px)] p-4">
         <PopoverHeader>
-          <PopoverTitle>поддерживаемые форматы</PopoverTitle>
+          <PopoverTitle>Supported formats</PopoverTitle>
           <PopoverDescription>
-            До 5 MB на файл. Векторизация и оптимизация SVG выполняются в
-            браузере.
+            Up to 5 MB per file. Vectorization and SVG optimization run in the
+            browser.
           </PopoverDescription>
         </PopoverHeader>
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, LoaderCircle, RotateCcw } from "lucide-react";
+import { Archive, LoaderCircle, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { HeroIllustration } from "@/components/brand/HeroIllustration";
@@ -23,17 +23,18 @@ export function ConversionCenter() {
     totalCount,
     error,
     isBusy,
+    isRetransforming,
     convertFiles,
     selectItem,
-    reset,
+    clear,
   } = useConversion();
   const [isZipping, setIsZipping] = useState(false);
 
   if (view === "processing") {
     const label =
       processingItem?.stage === "generating"
-        ? "Генерация компонента..."
-        : "Векторизация...";
+        ? "Generating component..."
+        : "Vectorizing...";
 
     return (
       <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 py-24 text-center">
@@ -47,7 +48,7 @@ export function ConversionCenter() {
           ) : null}
           {totalCount > 1 ? (
             <p className="mt-2 text-sm text-muted-foreground">
-              {doneCount} из {totalCount}
+              {doneCount} of {totalCount}
             </p>
           ) : null}
         </div>
@@ -62,12 +63,10 @@ export function ConversionCenter() {
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-base font-medium">Готово</p>
+            <p className="text-base font-medium">Done</p>
             <p className="text-base text-muted-foreground">
               {activeItem.fileName}
-              {showBatchControls
-                ? ` · ${doneCount} из ${totalCount}`
-                : null}
+              {showBatchControls ? ` · ${doneCount} of ${totalCount}` : null}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -91,9 +90,9 @@ export function ConversionCenter() {
                 Download ZIP
               </Button>
             ) : null}
-            <Button type="button" variant="outline" onClick={reset}>
-              <RotateCcw />
-              Загрузить ещё
+            <Button type="button" variant="outline" onClick={clear}>
+              <Trash2 />
+              Clear
             </Button>
           </div>
         </div>
@@ -129,7 +128,9 @@ export function ConversionCenter() {
         ) : null}
 
         <Preview
-          originalPreview={activeItem.previewUrl ?? null}
+          originalPreview={
+            activeItem.previewUrl ?? activeItem.previewDataUrl ?? null
+          }
           svg={activeItem.svg ?? null}
           fileName={activeItem.fileName}
         />
@@ -138,6 +139,7 @@ export function ConversionCenter() {
           svg={activeItem.svg ?? null}
           jsx={activeItem.jsx ?? null}
           tsx={activeItem.tsx ?? null}
+          isRetransforming={isRetransforming}
         />
 
         <DownloadButtons
@@ -146,6 +148,8 @@ export function ConversionCenter() {
           tsx={activeItem.tsx ?? null}
           componentName={activeItem.componentName ?? null}
         />
+
+        <Dropzone disabled={isBusy} onFilesSelect={convertFiles} />
       </div>
     );
   }

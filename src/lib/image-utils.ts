@@ -75,6 +75,30 @@ export function fileToObjectUrl(file: File): string {
   return URL.createObjectURL(file);
 }
 
+export async function blobUrlToDataUrl(blobUrl: string): Promise<string> {
+  const response = await fetch(blobUrl);
+  const blob = await response.blob();
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result);
+        return;
+      }
+
+      reject(new Error("Failed to read preview data."));
+    };
+
+    reader.onerror = () => {
+      reject(new Error("Failed to read preview data."));
+    };
+
+    reader.readAsDataURL(blob);
+  });
+}
+
 export function fileToImageData(
   file: File,
   maxSize = MAX_IMAGE_DIMENSION,

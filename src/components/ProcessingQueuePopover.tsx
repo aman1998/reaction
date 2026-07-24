@@ -17,17 +17,17 @@ import { cn } from "@/lib/utils";
 function stageLabel(stage: string | undefined): string {
   switch (stage) {
     case "vectorizing":
-      return "векторизация";
+      return "Vectorizing";
     case "generating":
-      return "генерация компонента";
+      return "Generating component";
     case "done":
-      return "готово";
+      return "Done";
     case "error":
-      return "ошибка";
+      return "Error";
     case "idle":
-      return "ожидание";
+      return "Waiting";
     default:
-      return "ожидание";
+      return "Waiting";
   }
 }
 
@@ -39,7 +39,7 @@ export function ProcessingQueuePopover() {
     <Popover>
       <PopoverTrigger
         className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full border border-border bg-background px-2.5 text-foreground transition-colors hover:bg-muted"
-        aria-label="Очередь обработки"
+        aria-label="Processing queue"
       >
         <ChevronDown className="size-4" />
         {totalCount > 0 ? (
@@ -50,7 +50,7 @@ export function ProcessingQueuePopover() {
       </PopoverTrigger>
       <PopoverContent align="end" className="w-[min(92vw,360px)] p-4">
         <PopoverHeader className="flex-row items-center justify-between gap-2">
-          <PopoverTitle>очередь обработки</PopoverTitle>
+          <PopoverTitle>Processing queue</PopoverTitle>
           {totalCount > 0 ? (
             <Badge variant="secondary">
               {doneCount}/{totalCount}
@@ -78,8 +78,7 @@ export function ProcessingQueuePopover() {
               </svg>
             </div>
             <PopoverDescription className="max-w-[240px] text-center">
-              тут пока что ничего нет, только мы вдвоём. попробуй загрузить
-              изображение!
+              Nothing here yet. Upload an image to get started.
             </PopoverDescription>
           </div>
         ) : (
@@ -89,6 +88,7 @@ export function ProcessingQueuePopover() {
               const isSelectable = item.stage === "done";
               const isItemBusy =
                 item.stage === "vectorizing" || item.stage === "generating";
+              const previewSrc = item.previewUrl ?? item.previewDataUrl;
 
               return (
                 <button
@@ -105,10 +105,10 @@ export function ProcessingQueuePopover() {
                 >
                   <div className="flex items-start gap-3">
                     <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-md border bg-background">
-                      {item.previewUrl ? (
+                      {previewSrc ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
-                          src={item.previewUrl}
+                          src={previewSrc}
                           alt={item.fileName}
                           className="size-full object-cover"
                         />

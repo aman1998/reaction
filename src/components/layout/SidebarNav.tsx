@@ -14,15 +14,15 @@ type NavItem = {
 };
 
 const topItems: NavItem[] = [
-  { href: "/", label: "скачать", icon: Download },
-  { href: "/style", label: "стиль", icon: Palette },
+  { href: "/", label: "Download", icon: Download },
+  { href: "/style", label: "Style", icon: Palette },
 ];
 
 const bottomItems: NavItem[] = [
-  { href: "/donations", label: "донаты", icon: Heart },
-  { href: "/news", label: "новости", icon: Sparkles },
-  { href: "/info", label: "инфо", icon: Info },
-  { href: "/settings", label: "настройки", icon: Settings },
+  { href: "/donations", label: "Donations", icon: Heart },
+  { href: "/news", label: "News", icon: Sparkles },
+  { href: "/info", label: "Info", icon: Info },
+  { href: "/settings", label: "Settings", icon: Settings },
 ];
 
 function NavButton({ item }: { item: NavItem }) {
