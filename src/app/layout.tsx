@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Image to React Component",
   description:
-    "Convert PNG, JPG, WebP, and SVG images into optimized SVG and React JSX/TSX components.",
+    "Convert PNG, JPG, WebP, and SVG images into optimized SVG and React JSX/TSX components. 100% in-browser — files never leave your device.",
 };
 
 export default function RootLayout({

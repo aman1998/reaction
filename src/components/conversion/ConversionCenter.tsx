@@ -1,6 +1,6 @@
 "use client";
 
-import { LoaderCircle } from "lucide-react";
+import { LoaderCircle, Shield } from "lucide-react";
 
 import { HeroIllustration } from "@/components/brand/HeroIllustration";
 import { ClearQueueDialog } from "@/components/conversion/ClearQueueDialog";

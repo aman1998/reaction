@@ -87,6 +87,9 @@ export function Dropzone({ disabled = false, onFilesSelect }: DropzoneProps) {
       <p className="mt-2 max-w-sm text-base text-muted-foreground">
         PNG, JPG, JPEG, WebP, or SVG up to 5 MB — multiple files supported
       </p>
+      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+        Nothing is uploaded to our servers.
+      </p>
 
       <input
         ref={inputRef}
