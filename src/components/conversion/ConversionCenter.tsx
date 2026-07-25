@@ -1,6 +1,7 @@
 "use client";
 
-import { LoaderCircle, Shield } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { HeroIllustration } from "@/components/brand/HeroIllustration";
 import { ClearQueueDialog } from "@/components/conversion/ClearQueueDialog";
@@ -10,9 +11,12 @@ import { CodeViewer } from "@/components/CodeViewer";
 import { DownloadButtons } from "@/components/DownloadButtons";
 import { Dropzone } from "@/components/Dropzone";
 import { Preview } from "@/components/Preview";
-import { cn } from "@/lib/utils";
+import { Button } from "../ui/button";
+
+const FILE_LIST_LIMIT = 30;
 
 export function ConversionCenter() {
+  const [showAllFiles, setShowAllFiles] = useState(false);
   const {
     view,
     queue,
@@ -56,6 +60,8 @@ export function ConversionCenter() {
 
   if (view === "result" && activeItem) {
     const showBatchControls = totalCount > 1;
+    const visibleQueue = showAllFiles ? queue : queue.slice(0, FILE_LIST_LIMIT);
+    const hiddenFileCount = queue.length - FILE_LIST_LIMIT;
 
     return (
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
@@ -77,20 +83,14 @@ export function ConversionCenter() {
 
         {showBatchControls ? (
           <div className="flex flex-wrap gap-2">
-            {queue.map((item) => (
-              <button
+            {visibleQueue.map((item) => (
+              <Button
                 key={item.id}
                 type="button"
+                variant={item.id === activeItem.id ? "default" : "outline"}
+                size="lg"
                 disabled={item.stage !== "done"}
                 onClick={() => selectItem(item.id)}
-                className={cn(
-                  "rounded-lg border px-3 py-1.5 text-sm transition-colors",
-                  item.id === activeItem.id
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : item.stage === "done"
-                      ? "hover:bg-muted"
-                      : "cursor-not-allowed opacity-50",
-                )}
               >
                 {item.stage === "vectorizing" || item.stage === "generating" ? (
                   <span className="inline-flex items-center gap-1.5">
@@ -100,8 +100,18 @@ export function ConversionCenter() {
                 ) : (
                   item.fileName
                 )}
-              </button>
+              </Button>
             ))}
+            {!showAllFiles && hiddenFileCount > 0 ? (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setShowAllFiles(true)}
+                size="lg"
+              >
+                Show {hiddenFileCount} more
+              </Button>
+            ) : null}
           </div>
         ) : null}
 

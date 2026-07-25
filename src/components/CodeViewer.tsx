@@ -3,6 +3,7 @@
 import { Check, Copy, LoaderCircle } from "lucide-react";
 import { useState } from "react";
 
+import { StyleSettingsDrawer } from "@/components/style/StyleSettingsDrawer";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -64,6 +65,7 @@ export function CodeViewer({
               </TabsTrigger>
             ))}
           </TabsList>
+          <StyleSettingsDrawer />
         </div>
 
         {tabs.map((tab) => (
