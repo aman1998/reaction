@@ -57,21 +57,25 @@ export function CodeViewer({
       ) : null}
 
       <Tabs defaultValue="tsx">
-        <div className="flex items-center justify-between gap-3 border-b px-4 py-3">
-          <TabsList>
-            {tabs.map((tab) => (
-              <TabsTrigger key={tab.id} value={tab.id} disabled={!tab.value}>
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          <StyleSettingsDrawer />
+        <div className="flex flex-col gap-2 border-b px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+          <div className="w-full min-w-0 overflow-x-auto">
+            <TabsList>
+              {tabs.map((tab) => (
+                <TabsTrigger key={tab.id} value={tab.id} disabled={!tab.value}>
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+          <div className="self-end sm:self-auto">
+            <StyleSettingsDrawer />
+          </div>
         </div>
 
         {tabs.map((tab) => (
           <TabsContent key={tab.id} value={tab.id} className="p-0">
-            <div className="flex items-center justify-between border-b px-4 py-2">
-              <span className="text-sm text-muted-foreground">
+            <div className="flex items-center justify-between gap-2 border-b px-3 py-2 sm:px-4">
+              <span className="text-xs text-muted-foreground sm:text-sm">
                 {tab.value ? `${tab.value.length} characters` : "Not available"}
               </span>
               <Button
@@ -80,12 +84,15 @@ export function CodeViewer({
                 size="sm"
                 disabled={!tab.value || isRetransforming}
                 onClick={() => handleCopy(tab.id, tab.value)}
+                className="shrink-0"
               >
                 {copiedTab === tab.id ? <Check /> : <Copy />}
-                {copiedTab === tab.id ? "Copied" : "Copy"}
+                <span className="sr-only sm:not-sr-only">
+                  {copiedTab === tab.id ? "Copied" : "Copy"}
+                </span>
               </Button>
             </div>
-            <pre className="max-h-[420px] overflow-auto p-4 font-mono text-sm leading-6">
+            <pre className="max-h-[280px] overflow-auto p-3 font-mono text-xs leading-6 sm:max-h-[420px] sm:p-4 sm:text-sm">
               <code>{tab.value ?? "Generate a component to view code."}</code>
             </pre>
           </TabsContent>

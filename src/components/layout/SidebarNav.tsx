@@ -2,35 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Download,
-  Heart,
-  Info,
-  Palette,
-  Settings,
-  Sparkles,
-} from "lucide-react";
 
 import { AppLogo } from "@/components/brand/AppLogo";
+import {
+  BOTTOM_NAV_ITEMS,
+  TOP_NAV_ITEMS,
+  type NavItem,
+} from "@/lib/nav-items";
 import { cn } from "@/lib/utils";
-
-type NavItem = {
-  href: string;
-  label: string;
-  icon: React.ComponentType<{ className?: string }>;
-};
-
-const topItems: NavItem[] = [
-  { href: "/", label: "Download", icon: Download },
-  { href: "/style", label: "Style", icon: Palette },
-];
-
-const bottomItems: NavItem[] = [
-  // { href: "/donations", label: "Donations", icon: Heart },
-  // { href: "/news", label: "News", icon: Sparkles },
-  // { href: "/info", label: "Info", icon: Info },
-  { href: "/settings", label: "Settings", icon: Settings },
-];
 
 function NavButton({ item }: { item: NavItem }) {
   const pathname = usePathname();
@@ -55,16 +34,16 @@ function NavButton({ item }: { item: NavItem }) {
 
 export function SidebarNav() {
   return (
-    <aside className="flex h-dvh w-[90px] shrink-0 flex-col overflow-hidden border-r bg-background">
+    <aside className="hidden h-dvh w-[90px] shrink-0 flex-col overflow-hidden border-r bg-background md:flex">
       <div className="flex shrink-0 flex-col items-center gap-[2px] py-4">
         <AppLogo className="mb-2" />
-        {topItems.map((item) => (
+        {TOP_NAV_ITEMS.map((item) => (
           <NavButton key={item.href} item={item} />
         ))}
       </div>
 
       <div className="mt-auto flex shrink-0 flex-col items-center gap-2 px-3 py-4">
-        {bottomItems.map((item) => (
+        {BOTTOM_NAV_ITEMS.map((item) => (
           <NavButton key={item.href} item={item} />
         ))}
       </div>

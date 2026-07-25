@@ -41,11 +41,12 @@ export function DownloadButtons({
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
       <Button
         type="button"
         variant="outline"
         disabled={!svg}
+        className="w-full sm:w-auto"
         onClick={() => svg && downloadTextFile(svg, `${baseName}.svg`, "image/svg+xml")}
       >
         <Download />
@@ -56,6 +57,7 @@ export function DownloadButtons({
         type="button"
         variant="outline"
         disabled={!jsx}
+        className="w-full sm:w-auto"
         onClick={() =>
           jsx && downloadTextFile(jsx, `${baseName}.jsx`, "text/javascript")
         }
@@ -68,6 +70,7 @@ export function DownloadButtons({
         type="button"
         variant="outline"
         disabled={!tsx}
+        className="w-full sm:w-auto"
         onClick={() =>
           tsx && downloadTextFile(tsx, `${baseName}.tsx`, "text/typescript")
         }

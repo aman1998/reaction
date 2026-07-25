@@ -1,7 +1,7 @@
 "use client";
 
 import { LoaderCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { HeroIllustration } from "@/components/brand/HeroIllustration";
 import { ClearQueueDialog } from "@/components/conversion/ClearQueueDialog";
@@ -39,7 +39,7 @@ export function ConversionCenter() {
         : "Vectorizing...";
 
     return (
-      <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 py-24 text-center">
+      <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 py-12 text-center sm:py-24">
         <LoaderCircle className="size-10 animate-spin text-muted-foreground" />
         <div>
           <p className="text-base font-medium">{label}</p>
@@ -65,10 +65,10 @@ export function ConversionCenter() {
 
     return (
       <div className="mx-auto flex w-full max-w-4xl flex-col gap-6">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
+        <div className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
+          <div className="min-w-0">
             <p className="text-base font-medium">Done</p>
-            <p className="text-base text-muted-foreground">
+            <p className="truncate text-base text-muted-foreground">
               {activeItem.fileName}
               {showBatchControls ? ` · ${doneCount} of ${totalCount}` : null}
             </p>
@@ -88,17 +88,20 @@ export function ConversionCenter() {
                 key={item.id}
                 type="button"
                 variant={item.id === activeItem.id ? "default" : "outline"}
-                size="lg"
+                size="default"
+                className="md:h-9 md:px-3.5"
                 disabled={item.stage !== "done"}
                 onClick={() => selectItem(item.id)}
               >
                 {item.stage === "vectorizing" || item.stage === "generating" ? (
-                  <span className="inline-flex items-center gap-1.5">
-                    <LoaderCircle className="size-3.5 animate-spin" />
-                    {item.fileName}
+                  <span className="inline-flex max-w-[12rem] items-center gap-1.5 sm:max-w-none">
+                    <LoaderCircle className="size-3.5 shrink-0 animate-spin" />
+                    <span className="truncate">{item.fileName}</span>
                   </span>
                 ) : (
-                  item.fileName
+                  <span className="max-w-[12rem] truncate sm:max-w-none">
+                    {item.fileName}
+                  </span>
                 )}
               </Button>
             ))}
@@ -107,7 +110,8 @@ export function ConversionCenter() {
                 type="button"
                 variant="secondary"
                 onClick={() => setShowAllFiles(true)}
-                size="lg"
+                size="default"
+                className="md:h-9 md:px-3.5"
               >
                 Show {hiddenFileCount} more
               </Button>
@@ -143,16 +147,8 @@ export function ConversionCenter() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-8 pt-10">
+    <div className="mx-auto flex w-full max-w-xl flex-col items-center gap-4 sm:gap-6">
       <HeroIllustration />
-
-      <div className="max-w-md text-center">
-        <p className="text-lg font-medium">Turn images into React components</p>
-        <p className="mt-2 text-base text-muted-foreground">
-          Upload an icon or image — get optimized SVG and ready-to-use JSX or
-          TSX in one step. No manual vectorization or separate tools.
-        </p>
-      </div>
 
       <div className="w-full">
         <Dropzone disabled={isBusy} onFilesSelect={convertFiles} />

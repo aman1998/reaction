@@ -70,7 +70,7 @@ export function Dropzone({ disabled = false, onFilesSelect }: DropzoneProps) {
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed px-6 py-10 text-center shadow-sm ring-1 ring-foreground/5 transition-colors",
+        "flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed px-4 py-8 text-center shadow-sm ring-1 ring-foreground/5 transition-colors sm:px-6 sm:py-10",
         isDragActive
           ? "border-primary bg-primary/10 ring-primary/20"
           : "border-foreground/20 bg-card hover:border-foreground/35 hover:bg-card/80",
@@ -84,10 +84,10 @@ export function Dropzone({ disabled = false, onFilesSelect }: DropzoneProps) {
       <p className="text-base font-medium">
         Drop images here or choose files
       </p>
-      <p className="mt-2 max-w-sm text-base text-muted-foreground">
+      <p className="mt-2 max-w-sm text-sm text-muted-foreground sm:text-base">
         PNG, JPG, JPEG, WebP, or SVG up to 5 MB — multiple files supported
       </p>
-      <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+      <p className="mt-1 max-w-sm text-xs text-muted-foreground sm:text-sm">
         Nothing is uploaded to our servers.
       </p>
 

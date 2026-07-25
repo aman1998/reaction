@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 
 import { ThemeProvider } from "@/components/theme-provider";
+import { rootMetadata } from "@/lib/seo/root-metadata";
 
 import "./globals.css";
 
@@ -15,11 +16,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Image to React Component",
-  description:
-    "Convert PNG, JPG, WebP, and SVG images into optimized SVG and React JSX/TSX components. 100% in-browser — files never leave your device.",
-};
+export const metadata: Metadata = rootMetadata;
 
 export default function RootLayout({
   children,

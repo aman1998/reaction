@@ -1,4 +1,20 @@
+import type { Metadata } from "next";
+
 import { GenerationOptions } from "@/components/style/GenerationOptions";
+import { createPageMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Style Settings",
+  description:
+    "Configure component generation options: currentColor, component style presets, and file naming conventions for SVG, JSX, and TSX export.",
+  path: "/style",
+  keywords: [
+    "react component style",
+    "svg currentColor",
+    "tsx naming convention",
+    "jsx export settings",
+  ],
+});
 
 export default function StylePage() {
   return (

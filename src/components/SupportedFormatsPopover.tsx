@@ -17,9 +17,9 @@ const FORMATS = ["PNG", "JPG", "JPEG", "WebP", "SVG"];
 export function SupportedFormatsPopover() {
   return (
     <Popover>
-      <PopoverTrigger className="inline-flex items-center gap-1.5 text-base text-muted-foreground transition-colors hover:text-foreground">
-        <Plus className="size-4" />
-        Supported formats
+      <PopoverTrigger className="inline-flex max-w-full items-center gap-1.5 truncate text-sm text-muted-foreground transition-colors hover:text-foreground sm:text-base">
+        <Plus className="size-4 shrink-0" />
+        <span className="truncate">Supported formats</span>
       </PopoverTrigger>
       <PopoverContent align="center" className="w-[min(92vw,420px)] p-4">
         <PopoverHeader>

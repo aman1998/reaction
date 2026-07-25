@@ -1,4 +1,13 @@
+import type { Metadata } from "next";
+
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { createPageMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Settings",
+  path: "/settings",
+  noindex: true,
+});
 
 export default function SettingsPage() {
   return (

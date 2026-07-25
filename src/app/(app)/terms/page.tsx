@@ -1,3 +1,15 @@
+import type { Metadata } from "next";
+
+import { createPageMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Terms of Service",
+  description:
+    "Terms of Service for Image to Dev — the in-browser tool for converting images to optimized SVG and React JSX/TSX components.",
+  path: "/terms",
+  keywords: ["terms of service", "image to dev terms"],
+});
+
 const TERMS_SECTIONS = [
   {
     title: "Acceptance of Terms",
