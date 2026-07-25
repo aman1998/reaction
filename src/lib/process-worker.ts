@@ -4,15 +4,23 @@ import type {
   TransformActionResult,
   TransformResult,
 } from "@/lib/types";
+import type { SvgOptimization } from "@/lib/svg-optimization";
+
+export type SvgProcessResult = {
+  svg: string;
+  rawSvg: string;
+};
 
 type RasterPayload = {
   type: "raster";
   imageData: ImageData;
+  svgOptimization: SvgOptimization;
 };
 
 type SvgPayload = {
   type: "svg";
   rawSvg: string;
+  svgOptimization: SvgOptimization;
 };
 
 type TransformPayload = {
@@ -29,6 +37,7 @@ type WorkerRequest = (RasterPayload | SvgPayload | TransformPayload) & {
 type SvgWorkerSuccess = {
   id: number;
   svg: string;
+  rawSvg: string;
 };
 
 type TransformWorkerSuccess = {
@@ -48,7 +57,7 @@ type WorkerResponse = SvgWorkerSuccess | TransformWorkerSuccess | WorkerFailure;
 type PendingRequest =
   | {
       kind: "svg";
-      resolve: (svg: string) => void;
+      resolve: (result: SvgProcessResult) => void;
       reject: (error: Error) => void;
     }
   | {
@@ -83,12 +92,15 @@ function getWorker(): Worker {
       }
 
       if (pending.kind === "svg") {
-        if (!("svg" in event.data)) {
+        if (!("rawSvg" in event.data)) {
           pending.reject(new Error("Unexpected worker response."));
           return;
         }
 
-        pending.resolve(event.data.svg);
+        pending.resolve({
+          svg: event.data.svg,
+          rawSvg: event.data.rawSvg,
+        });
         return;
       }
 
@@ -118,12 +130,15 @@ function getWorker(): Worker {
   return worker;
 }
 
-function runSvgWorkerTask(payload: RasterPayload | SvgPayload): Promise<string> {
+function runSvgWorkerTask(
+  payload: Omit<RasterPayload, "type"> | Omit<SvgPayload, "type">,
+  type: RasterPayload["type"] | SvgPayload["type"],
+): Promise<SvgProcessResult> {
   return new Promise((resolve, reject) => {
     const id = nextRequestId++;
     pendingRequests.set(id, { kind: "svg", resolve, reject });
 
-    const request: WorkerRequest = { id, ...payload };
+    const request = { id, type, ...payload } as WorkerRequest;
     getWorker().postMessage(request);
   });
 }
@@ -142,12 +157,16 @@ function runTransformWorkerTask(
 
 export function vectorizeAndOptimizeInWorker(
   imageData: ImageData,
-): Promise<string> {
-  return runSvgWorkerTask({ type: "raster", imageData });
+  svgOptimization: SvgOptimization,
+): Promise<SvgProcessResult> {
+  return runSvgWorkerTask({ imageData, svgOptimization }, "raster");
 }
 
-export function optimizeSvgInWorker(rawSvg: string): Promise<string> {
-  return runSvgWorkerTask({ type: "svg", rawSvg });
+export function optimizeSvgInWorker(
+  rawSvg: string,
+  svgOptimization: SvgOptimization,
+): Promise<SvgProcessResult> {
+  return runSvgWorkerTask({ rawSvg, svgOptimization }, "svg");
 }
 
 export async function transformSvgInWorker(

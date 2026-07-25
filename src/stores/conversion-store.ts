@@ -9,8 +9,11 @@ import {
 } from "@/lib/conversion-persist";
 import { blobUrlToDataUrl, toComponentName, validateFile } from "@/lib/image-utils";
 import { processImageClient } from "@/lib/process-client";
-import { transformSvgInWorker } from "@/lib/process-worker";
-import { useSettingsStore } from "@/stores/settings-store";
+import {
+  optimizeSvgInWorker,
+  transformSvgInWorker,
+} from "@/lib/process-worker";
+import { selectGenerationOptions, useSettingsStore } from "@/stores/settings-store";
 
 export type QueueStage =
   | "idle"
@@ -26,6 +29,7 @@ export type QueueItem = {
   error?: string;
   previewUrl?: string;
   previewDataUrl?: string;
+  rawSvg?: string;
   svg?: string;
   jsx?: string;
   tsx?: string;
@@ -51,7 +55,7 @@ type ConversionState = {
   removeItem: (id: string) => void;
   clear: () => void;
   hydrate: () => Promise<void>;
-  retransformDoneItems: () => Promise<void>;
+  reapplyDoneItems: () => Promise<void>;
 };
 
 function createId(): string {
@@ -78,6 +82,7 @@ function toPublicItem(item: InternalQueueItem): QueueItem {
     error: item.error,
     previewUrl: item.previewUrl,
     previewDataUrl: item.previewDataUrl,
+    rawSvg: item.rawSvg,
     svg: item.svg,
     jsx: item.jsx,
     tsx: item.tsx,
@@ -94,8 +99,7 @@ function patchQueueItem(
 }
 
 function getGenerationOptions() {
-  const { currentColor, componentStyle } = useSettingsStore.getState();
-  return { currentColor, componentStyle };
+  return selectGenerationOptions(useSettingsStore.getState());
 }
 
 async function persistDoneItem(
@@ -271,9 +275,9 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
     void saveSessionMeta({ activeId: nextActiveId, view: nextView });
   },
 
-  retransformDoneItems: async () => {
+  reapplyDoneItems: async () => {
     const doneItems = get().queue.filter(
-      (item) => item.stage === "done" && item.svg,
+      (item) => item.stage === "done" && (item.rawSvg || item.svg),
     );
 
     if (doneItems.length === 0) {
@@ -291,8 +295,26 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
           return;
         }
 
+        const sourceSvg = item.rawSvg ?? item.svg!;
+
+        let svg = sourceSvg;
+
+        try {
+          const optimized = await optimizeSvgInWorker(
+            sourceSvg,
+            options.svgOptimization,
+          );
+          svg = optimized.svg;
+        } catch {
+          continue;
+        }
+
+        if (generation !== retransformGeneration) {
+          return;
+        }
+
         const transformResult = await transformSvgInWorker({
-          svg: item.svg!,
+          svg,
           fileName: item.fileName,
           options: {
             componentName: item.componentName,
@@ -309,6 +331,8 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
         }
 
         const nextQueue = patchQueueItem(get().queue, item.id, {
+          rawSvg: item.rawSvg ?? sourceSvg,
+          svg,
           jsx: transformResult.jsx,
           tsx: transformResult.tsx,
           componentName: transformResult.componentName,
@@ -405,8 +429,10 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
         });
 
         try {
+          const generationOptions = getGenerationOptions();
           const clientResult = await processImageClient(file, {
             componentName: item.componentName,
+            svgOptimization: generationOptions.svgOptimization,
           });
 
           if (generation !== processGeneration) {
@@ -418,6 +444,7 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
             queue: patchQueueItem(get().queue, item.id, {
               stage: "generating",
               previewUrl: clientResult.originalPreview,
+              rawSvg: clientResult.rawSvg,
               svg: clientResult.svg,
               componentName: clientResult.componentName,
             }),
@@ -428,7 +455,7 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
             fileName: file.name,
             options: {
               componentName: clientResult.componentName,
-              ...getGenerationOptions(),
+              ...generationOptions,
             },
           });
 
@@ -454,6 +481,7 @@ export const useConversionStore = create<ConversionState>((set, get) => ({
             stage: "done",
             previewUrl: clientResult.originalPreview,
             previewDataUrl,
+            rawSvg: clientResult.rawSvg,
             svg: clientResult.svg,
             jsx: transformResult.jsx,
             tsx: transformResult.tsx,

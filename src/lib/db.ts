@@ -5,6 +5,7 @@ export type PersistedConversionItem = {
   fileName: string;
   componentName: string;
   svg: string;
+  rawSvg?: string;
   jsx: string;
   tsx: string;
   previewDataUrl?: string;
@@ -20,6 +21,10 @@ class ImagetodevDB extends Dexie {
   constructor() {
     super("imagetodev");
     this.version(1).stores({
+      conversionItems: "id, createdAt",
+      meta: "key",
+    });
+    this.version(2).stores({
       conversionItems: "id, createdAt",
       meta: "key",
     });

@@ -2,6 +2,10 @@ import { transform } from "@svgr/core";
 import jsxPlugin from "@svgr/plugin-jsx";
 
 import {
+  DEFAULT_CODE_FORMATTING,
+  isFormattedCode,
+} from "@/lib/code-formatting";
+import {
   DEFAULT_COMPONENT_STYLE,
   getSvgrStyleOptions,
 } from "@/lib/component-style";
@@ -23,7 +27,9 @@ function buildSvgrConfig(
     ref: style.forwardRef,
     memo: style.memo,
     svgo: false,
-    prettier: false,
+    prettier: isFormattedCode(
+      options.codeFormatting ?? DEFAULT_CODE_FORMATTING,
+    ),
     runtimeConfig: false,
     jsxRuntime: "automatic",
     exportType: style.exportType,

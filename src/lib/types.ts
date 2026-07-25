@@ -1,4 +1,6 @@
 import type { ComponentStyle } from "@/lib/component-style";
+import type { CodeFormatting } from "@/lib/code-formatting";
+import type { SvgOptimization } from "@/lib/svg-optimization";
 
 export type SupportedMime =
   | "image/png"
@@ -21,10 +23,13 @@ export type ConvertOptions = {
   componentName?: string;
   componentStyle?: ComponentStyle;
   currentColor?: boolean;
+  codeFormatting?: CodeFormatting;
+  svgOptimization?: SvgOptimization;
 };
 
 export type ClientProcessResult = {
   svg: string;
+  rawSvg: string;
   originalPreview: string;
   componentName: string;
 };

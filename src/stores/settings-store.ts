@@ -2,6 +2,11 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import {
+  DEFAULT_CODE_FORMATTING,
+  isCodeFormatting,
+  type CodeFormatting,
+} from "@/lib/code-formatting";
+import {
   DEFAULT_COMPONENT_STYLE,
   isComponentStyle,
   migrateLegacyOptions,
@@ -11,9 +16,17 @@ import {
   isNamingConvention,
   type NamingConvention,
 } from "@/lib/image-utils";
+import {
+  DEFAULT_SVG_OPTIMIZATION,
+  isSvgOptimization,
+  type SvgOptimization,
+} from "@/lib/svg-optimization";
 import type { ConvertOptions } from "@/lib/types";
 
-export type GenerationOptions = Pick<ConvertOptions, "currentColor"> & {
+export type GenerationOptions = Pick<
+  ConvertOptions,
+  "currentColor" | "codeFormatting" | "svgOptimization"
+> & {
   componentStyle: ComponentStyle;
   namingConvention: NamingConvention;
 };
@@ -31,6 +44,8 @@ export const DEFAULT_GENERATION_OPTIONS: Required<GenerationOptions> = {
   currentColor: true,
   componentStyle: DEFAULT_COMPONENT_STYLE,
   namingConvention: "pascalCase",
+  codeFormatting: DEFAULT_CODE_FORMATTING,
+  svgOptimization: DEFAULT_SVG_OPTIMIZATION,
 };
 
 type SettingsState = Required<GenerationOptions> & {
@@ -40,6 +55,8 @@ type SettingsState = Required<GenerationOptions> & {
   ) => void;
   updateComponentStyle: (value: ComponentStyle) => void;
   updateNamingConvention: (value: NamingConvention) => void;
+  updateCodeFormatting: (value: CodeFormatting) => void;
+  updateSvgOptimization: (value: SvgOptimization) => void;
 };
 
 function readLegacyOptions(): PersistedGenerationOptions | null {
@@ -84,6 +101,14 @@ function mergeGenerationOptions(
     merged.namingConvention = DEFAULT_GENERATION_OPTIONS.namingConvention;
   }
 
+  if (!isCodeFormatting(merged.codeFormatting)) {
+    merged.codeFormatting = DEFAULT_GENERATION_OPTIONS.codeFormatting;
+  }
+
+  if (!isSvgOptimization(merged.svgOptimization)) {
+    merged.svgOptimization = DEFAULT_GENERATION_OPTIONS.svgOptimization;
+  }
+
   return merged;
 }
 
@@ -94,6 +119,8 @@ export const useSettingsStore = create<SettingsState>()(
       updateOption: (key, value) => set({ [key]: value }),
       updateComponentStyle: (value) => set({ componentStyle: value }),
       updateNamingConvention: (value) => set({ namingConvention: value }),
+      updateCodeFormatting: (value) => set({ codeFormatting: value }),
+      updateSvgOptimization: (value) => set({ svgOptimization: value }),
     }),
     {
       name: "imagetodev:settings",
@@ -101,6 +128,8 @@ export const useSettingsStore = create<SettingsState>()(
         currentColor: state.currentColor,
         componentStyle: state.componentStyle,
         namingConvention: state.namingConvention,
+        codeFormatting: state.codeFormatting,
+        svgOptimization: state.svgOptimization,
       }),
       merge: (persistedState, currentState) => ({
         ...currentState,
@@ -132,10 +161,16 @@ export const useSettingsStore = create<SettingsState>()(
 
 export function selectGenerationOptions(
   state: SettingsState,
-): Required<GenerationOptions> {
+): Required<
+  Pick<
+    ConvertOptions,
+    "currentColor" | "componentStyle" | "codeFormatting" | "svgOptimization"
+  >
+> {
   return {
     currentColor: state.currentColor,
     componentStyle: state.componentStyle,
-    namingConvention: state.namingConvention,
+    codeFormatting: state.codeFormatting,
+    svgOptimization: state.svgOptimization,
   };
 }

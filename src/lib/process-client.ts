@@ -15,7 +15,7 @@ import type { ClientProcessResult, ConvertOptions } from "@/lib/types";
 
 export async function processImageClient(
   file: File,
-  options: Pick<ConvertOptions, "componentName"> = {},
+  options: Pick<ConvertOptions, "componentName" | "svgOptimization"> = {},
 ): Promise<ClientProcessResult> {
   const validationError = validateFile(file);
 
@@ -31,19 +31,21 @@ export async function processImageClient(
 
   const componentName = options.componentName ?? toComponentName(file.name);
   const originalPreview = fileToObjectUrl(file);
+  const svgOptimization = options.svgOptimization ?? "balanced";
 
-  let svg: string;
+  let processed: { svg: string; rawSvg: string };
 
   if (isSvgFile(file) || mime === "image/svg+xml") {
     const rawSvg = await readSvgFile(file);
-    svg = await optimizeSvgInWorker(rawSvg);
+    processed = await optimizeSvgInWorker(rawSvg, svgOptimization);
   } else {
     const imageData = await fileToImageData(file);
-    svg = await vectorizeAndOptimizeInWorker(imageData);
+    processed = await vectorizeAndOptimizeInWorker(imageData, svgOptimization);
   }
 
   return {
-    svg,
+    svg: processed.svg,
+    rawSvg: processed.rawSvg,
     originalPreview,
     componentName,
   };

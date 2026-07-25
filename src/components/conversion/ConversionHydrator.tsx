@@ -6,6 +6,18 @@ import { useEffect } from "react";
 import { useConversionStore } from "@/stores/conversion-store";
 import { useSettingsStore } from "@/stores/settings-store";
 
+function hasGenerationOptionsChanged(
+  state: ReturnType<typeof useSettingsStore.getState>,
+  previousState: ReturnType<typeof useSettingsStore.getState>,
+): boolean {
+  return (
+    state.currentColor !== previousState.currentColor ||
+    state.componentStyle !== previousState.componentStyle ||
+    state.codeFormatting !== previousState.codeFormatting ||
+    state.svgOptimization !== previousState.svgOptimization
+  );
+}
+
 export function ConversionHydrator({
   children,
 }: {
@@ -20,14 +32,11 @@ export function ConversionHydrator({
 
   useEffect(() => {
     return useSettingsStore.subscribe((state, previousState) => {
-      if (
-        state.currentColor === previousState.currentColor &&
-        state.componentStyle === previousState.componentStyle
-      ) {
+      if (!hasGenerationOptionsChanged(state, previousState)) {
         return;
       }
 
-      void useConversionStore.getState().retransformDoneItems();
+      void useConversionStore.getState().reapplyDoneItems();
     });
   }, []);
 

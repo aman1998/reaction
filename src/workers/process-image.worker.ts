@@ -1,6 +1,10 @@
 import { toComponentName } from "@/lib/image-utils";
 import { optimizeSvg } from "@/lib/optimize";
 import { transformToReact } from "@/lib/transform";
+import {
+  shouldSkipSvgOptimization,
+  type SvgOptimization,
+} from "@/lib/svg-optimization";
 import { MAX_SVG_SIZE, type ConvertOptions } from "@/lib/types";
 import { vectorizeRaster } from "@/lib/vectorize";
 
@@ -8,12 +12,14 @@ type RasterMessage = {
   id: number;
   type: "raster";
   imageData: ImageData;
+  svgOptimization: SvgOptimization;
 };
 
 type SvgMessage = {
   id: number;
   type: "svg";
   rawSvg: string;
+  svgOptimization: SvgOptimization;
 };
 
 type TransformMessage = {
@@ -29,6 +35,7 @@ type WorkerRequest = RasterMessage | SvgMessage | TransformMessage;
 type SvgWorkerSuccess = {
   id: number;
   svg: string;
+  rawSvg: string;
 };
 
 type TransformWorkerSuccess = {
@@ -44,6 +51,17 @@ type WorkerFailure = {
 };
 
 type WorkerResponse = SvgWorkerSuccess | TransformWorkerSuccess | WorkerFailure;
+
+function buildSvgOutput(
+  rawSvg: string,
+  svgOptimization: SvgOptimization,
+): { svg: string; rawSvg: string } {
+  const svg = shouldSkipSvgOptimization(svgOptimization)
+    ? rawSvg
+    : optimizeSvg(rawSvg, svgOptimization);
+
+  return { svg, rawSvg };
+}
 
 self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
   const { id, type } = event.data;
@@ -80,16 +98,16 @@ self.onmessage = async (event: MessageEvent<WorkerRequest>) => {
       return;
     }
 
-    let svg: string;
+    let output: { svg: string; rawSvg: string };
 
     if (type === "raster") {
       const rawSvg = await vectorizeRaster(event.data.imageData);
-      svg = optimizeSvg(rawSvg);
+      output = buildSvgOutput(rawSvg, event.data.svgOptimization);
     } else {
-      svg = optimizeSvg(event.data.rawSvg);
+      output = buildSvgOutput(event.data.rawSvg, event.data.svgOptimization);
     }
 
-    const response: SvgWorkerSuccess = { id, svg };
+    const response: SvgWorkerSuccess = { id, ...output };
     self.postMessage(response);
   } catch (processingError) {
     const response: WorkerFailure = {
