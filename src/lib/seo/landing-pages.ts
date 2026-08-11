@@ -48,7 +48,8 @@ const LANDING_PAGES: LandingPageConfig[] = [
       },
       {
         question: "What is the maximum PNG file size?",
-        answer: "Each PNG file can be up to 5 MB. You can process multiple files in one batch.",
+        answer:
+          "Each PNG file can be up to 5 MB. You can process multiple files in one batch.",
       },
     ],
   },
@@ -64,6 +65,7 @@ const LANDING_PAGES: LandingPageConfig[] = [
       "jpg to jsx",
       "jpg to tsx",
       "convert jpeg to react",
+      "convert jpg to react",
     ],
     h1: "Convert JPG to React Components",
     intro:
