@@ -54,6 +54,31 @@ export const PUBLIC_ROUTES = [
   { path: "/webp-to-react", priority: 0.9, changeFrequency: "weekly" as const },
   { path: "/svg-to-react", priority: 0.9, changeFrequency: "weekly" as const },
   { path: "/image-to-tsx", priority: 0.9, changeFrequency: "weekly" as const },
+  {
+    path: "/png-to-react-component-no-upload",
+    priority: 0.8,
+    changeFrequency: "weekly" as const,
+  },
+  {
+    path: "/batch-icons-to-react-components",
+    priority: 0.8,
+    changeFrequency: "weekly" as const,
+  },
+  {
+    path: "/logo-to-react-component",
+    priority: 0.8,
+    changeFrequency: "weekly" as const,
+  },
+  {
+    path: "/svg-to-react-component-online",
+    priority: 0.8,
+    changeFrequency: "weekly" as const,
+  },
+  {
+    path: "/free-react-icon-converter",
+    priority: 0.8,
+    changeFrequency: "weekly" as const,
+  },
   { path: "/style", priority: 0.6, changeFrequency: "monthly" as const },
   { path: "/terms", priority: 0.3, changeFrequency: "yearly" as const },
 ];
