@@ -213,6 +213,194 @@ const LANDING_PAGES: LandingPageConfig[] = [
       },
     ],
   },
+  {
+    slug: "png-to-react-component-no-upload",
+    path: "/png-to-react-component-no-upload",
+    title: "PNG to React Component — No Upload, 100% In Browser",
+    description:
+      "Convert PNG icons and logos to React JSX/TSX locally. Files never leave your device — free batch processing with optimized SVG output.",
+    keywords: [
+      "png to react component no upload",
+      "png to react offline",
+      "convert png to react browser",
+      "private png to jsx converter",
+    ],
+    h1: "Convert PNG to React Components Without Uploading",
+    intro:
+      "Drop a PNG and get optimized SVG plus copy-paste JSX and TSX — entirely in your browser. No account, no server, no subscription.",
+    benefits: [
+      "All processing runs locally — files stay on your machine",
+      "Outputs JSX, TSX, and optimized SVG in one step",
+      "Batch convert multiple PNGs and download a ZIP",
+      "currentColor and component style presets for production use",
+    ],
+    faq: [
+      {
+        question: "Are my PNG files uploaded to a server?",
+        answer:
+          "No. Vectorization and React code generation happen in your browser.",
+      },
+      {
+        question: "Can I convert multiple PNG icons at once?",
+        answer:
+          "Yes. Upload a batch and download all JSX/TSX files as a ZIP.",
+      },
+      {
+        question: "Is this free?",
+        answer: "Yes. Image to Dev is free with no credits or subscription.",
+      },
+    ],
+  },
+  {
+    slug: "batch-icons-to-react-components",
+    path: "/batch-icons-to-react-components",
+    title: "Batch Convert Icons to React Components",
+    description:
+      "Upload multiple PNG, SVG, or WebP icons and generate React JSX/TSX components in one batch. Download everything as a ZIP.",
+    keywords: [
+      "batch icons to react",
+      "bulk svg to react component",
+      "convert icon set to react",
+      "batch png to tsx",
+    ],
+    h1: "Batch Convert Icons to React Components",
+    intro:
+      "Building a design system or icon library? Convert an entire icon set to typed React components — SVG, JSX, and TSX — in one run.",
+    benefits: [
+      "Process multiple files in a single queue",
+      "Consistent naming conventions (PascalCase, kebab-case, etc.)",
+      "SVGO optimization for smaller bundle size",
+      "ZIP export with SVG + JSX + TSX for every icon",
+    ],
+    faq: [
+      {
+        question: "How many icons can I convert at once?",
+        answer:
+          "There is no hard limit on batch size. Each file can be up to 5 MB.",
+      },
+      {
+        question: "Do all icons get the same component style?",
+        answer:
+          "Yes. Set export style, currentColor, and naming once in Style settings.",
+      },
+      {
+        question: "What formats work for batch conversion?",
+        answer: "PNG, JPG, JPEG, WebP, and SVG.",
+      },
+    ],
+  },
+  {
+    slug: "logo-to-react-component",
+    path: "/logo-to-react-component",
+    title: "Logo to React Component Converter",
+    description:
+      "Turn a PNG or JPG logo into a scalable React component with optimized SVG, JSX, and TSX output. Free and in-browser.",
+    keywords: [
+      "logo to react component",
+      "convert logo to jsx",
+      "png logo to react",
+      "logo to svg react",
+    ],
+    h1: "Convert Your Logo to a React Component",
+    intro:
+      "Have a raster logo stuck in PNG or JPG? Vectorize it and get a ready-to-use React component for your Next.js or Vite app.",
+    benefits: [
+      "Works with PNG, JPG, and WebP logos",
+      "Side-by-side preview of original and vectorized SVG",
+      "forwardRef and memo export styles supported",
+      "No Illustrator or manual SVG editing required",
+    ],
+    faq: [
+      {
+        question: "Will complex logos vectorize well?",
+        answer:
+          "Simple logos and wordmarks work best. Very detailed photos may produce large SVG paths.",
+      },
+      {
+        question: "Can I use currentColor for theme switching?",
+        answer:
+          "Yes. Enable currentColor in Style settings to inherit text color from CSS.",
+      },
+      {
+        question: "Do I get TypeScript types?",
+        answer: "Yes. TSX output includes SVGProps<SVGSVGElement> typing.",
+      },
+    ],
+  },
+  {
+    slug: "svg-to-react-component-online",
+    path: "/svg-to-react-component-online",
+    title: "SVG to React Component Online — Free SVGR-Style Converter",
+    description:
+      "Upload an SVG and get optimized React JSX/TSX with forwardRef, memo, and currentColor options. Runs in your browser.",
+    keywords: [
+      "svg to react component online",
+      "svg to jsx converter free",
+      "svgr online alternative",
+      "svg to tsx generator",
+    ],
+    h1: "SVG to React Component — Online & Free",
+    intro:
+      "Skip the CLI setup. Upload an SVG, pick your export style, and copy production-ready React code — optimized with SVGO first.",
+    benefits: [
+      "SVGO optimization before code generation",
+      "5 component export styles (default, forwardRef, memo, named)",
+      "Instant preview and one-click copy",
+      "No Node.js or build step required",
+    ],
+    faq: [
+      {
+        question: "Is this a replacement for SVGR CLI?",
+        answer:
+          "For quick one-off conversions and previews, yes. For CI pipelines, SVGR CLI may still fit better.",
+      },
+      {
+        question: "Does it optimize the SVG before generating React code?",
+        answer:
+          "Yes. Choose from balanced, minimal, or conservative SVGO presets.",
+      },
+      {
+        question: "Can I paste SVG code instead of uploading?",
+        answer: "Upload an .svg file — paste support may be added later.",
+      },
+    ],
+  },
+  {
+    slug: "free-react-icon-converter",
+    path: "/free-react-icon-converter",
+    title: "Free React Icon Converter — PNG, SVG, WebP to JSX/TSX",
+    description:
+      "Free tool to convert icons into React components. No subscription, no credits, no upload — 100% in-browser.",
+    keywords: [
+      "free react icon converter",
+      "icon to react component free",
+      "convert icon to jsx free",
+      "react icon generator",
+    ],
+    h1: "Free React Icon Converter",
+    intro:
+      "Convert icons from PNG, SVG, or WebP into typed React components — completely free, no account needed.",
+    benefits: [
+      "Free forever — no per-conversion fees",
+      "Private: files never leave your browser",
+      "Batch-ready for icon sets and design systems",
+      "JSX and TSX with configurable naming",
+    ],
+    faq: [
+      {
+        question: "Is there a conversion limit?",
+        answer: "No credits or daily limits. Convert as many icons as you need.",
+      },
+      {
+        question: "What icon formats are supported?",
+        answer: "PNG, JPG, JPEG, WebP, and SVG up to 5 MB each.",
+      },
+      {
+        question: "Can I use the output in commercial projects?",
+        answer: "Yes. You own the generated code. See Terms for details.",
+      },
+    ],
+  },
 ];
 
 export const LANDING_PAGE_LINKS = LANDING_PAGES.map(({ path, slug }) => ({
